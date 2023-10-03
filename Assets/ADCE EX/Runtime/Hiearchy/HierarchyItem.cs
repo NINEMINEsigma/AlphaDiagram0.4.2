@@ -63,6 +63,7 @@ namespace AD.Experimental.GameEditor
 
         public void Refresh(bool boolen)
         {
+            MatchEditor.IsOpenListView = boolen;
             if (boolen == true) OpenListView(); else CloseListView();
         }
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AD.BASE;
 using AD.UI;
 using AD.Utility;
-using UnityEditor;
 using UnityEngine;
 
 namespace AD.Experimental.GameEditor
@@ -40,16 +39,19 @@ namespace AD.Experimental.GameEditor
             _Right.GetChilds().Add(self);
         }
 
-        //需要在自定义的OnSerialize的最前面使用
-        public static void BaseSerialize(this ICanSerializeOnCustomEditor self)
+        //需要在自定义的ISerializeHierarchyEditor.OnSerialize的最前面使用
+        public static void BaseHierarchyItemSerialize(this ISerializeHierarchyEditor self)
         {
-            var temp = self.GetChilds();
-            if (temp != null)
-                foreach (var item in temp)
-                {
-                    //self.RegisterHierarchyItem(item.MatchEditor);
-                    item.MatchHierarchyEditor.OnSerialize();
-                }
+            if (self.IsOpenListView)
+            {
+                var temp = self.MatchTarget.GetChilds();
+                self.MatchItem.ListSubListView.Clear();
+                if (temp != null)
+                    foreach (var item in temp)
+                    {
+                        self.RegisterHierarchyItem(item.MatchHierarchyEditor);
+                    }
+            }
         }
 
         public static void SetTitle(ISerializeHierarchyEditor editor,string title)
@@ -73,12 +75,13 @@ namespace AD.Experimental.GameEditor
     {
         HierarchyItem MatchItem { get; set; }
         ICanSerializeOnCustomEditor MatchTarget { get; }
+        bool IsOpenListView { get; set; }
     }
 
     public interface ICanSerializeOnCustomEditor 
     {
         ISerializeHierarchyEditor MatchHierarchyEditor { get; set; }
-        ISerializePropertiesEditor MatchPropertiesEditor { get; set; }
+        List<ISerializePropertiesEditor> MatchPropertiesEditors { get; set; }
         ICanSerializeOnCustomEditor ParentTarget { get; set; }
         List<ICanSerializeOnCustomEditor> GetChilds();
         void ClickOnLeft();

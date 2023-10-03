@@ -1,10 +1,10 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
 using AD.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.GraphicsBuffer;
 
 namespace AD.Experimental.GameEditor
 {
@@ -20,7 +20,8 @@ namespace AD.Experimental.GameEditor
     {
         public PropertiesEditorAssets EditorAssets;
 
-        public List<ISerializePropertiesEditor> TargetTopObjectEditors { get; private set; } = new();
+        public ICanSerializeOnCustomEditor MatchTarget;
+        public List<ISerializePropertiesEditor> CurrentPropertiesEditors => MatchTarget.MatchPropertiesEditors;
 
         private void Start()
         {
@@ -39,25 +40,25 @@ namespace AD.Experimental.GameEditor
         {
             get
             {
-                if (index < 0 || index > TargetTopObjectEditors.Count)
+                if (index < 0 || index > CurrentPropertiesEditors.Count)
                 {
                     Debug.LogError("Over Bound");
                     return null;
                 }
-                return TargetTopObjectEditors[index];
+                return CurrentPropertiesEditors[index];
             }
             set
             {
                 if (index == -1)
                 {
-                    TargetTopObjectEditors.Add(value);
+                    CurrentPropertiesEditors.Add(value);
                 }
-                else if (index < 0 || index > TargetTopObjectEditors.Count)
+                else if (index < 0 || index > CurrentPropertiesEditors.Count)
                 {
                     Debug.LogError("Over Bound");
                     return;
                 }
-                else TargetTopObjectEditors[index] = value;
+                else CurrentPropertiesEditors[index] = value;
             }
         }
 
@@ -73,7 +74,7 @@ namespace AD.Experimental.GameEditor
         public void ClearAndRefresh()
         {
             EditorAssets.PropertiesListView.Clear();
-            foreach (var item in TargetTopObjectEditors)
+            foreach (var item in CurrentPropertiesEditors)
             {
                 item.MatchItem = RegisterHierarchyItem(item);
             }
@@ -81,7 +82,7 @@ namespace AD.Experimental.GameEditor
 
         public void RefreshPanel(PointerEventData axisEventData)
         {
-            foreach (var target in TargetTopObjectEditors)
+            foreach (var target in CurrentPropertiesEditors)
             {
                 target.OnSerialize();
             }
