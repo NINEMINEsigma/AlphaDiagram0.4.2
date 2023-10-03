@@ -103,7 +103,7 @@ namespace AD.UI
             GameObject.Destroy(result.Value);
         }
 
-        private Dictionary<string, Queue<GameObject>> Pool = new();
+        protected Dictionary<string, Queue<GameObject>> Pool = new();
 
         protected virtual GameObject Spawn(string key, GameObject perfab)
         {

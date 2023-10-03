@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -692,16 +693,7 @@ namespace AD.BASE
     {
         #region attribute
 
-        private HashSet<object> AD__Objects = new HashSet<object>() { new ADMessageRecord() };
-        private ADMessageRecord _m_AD__MessageRecord = null;
-        private ADMessageRecord AD__MessageRecord
-        {
-            get
-            {
-                _m_AD__MessageRecord ??= GetModel<ADMessageRecord>();
-                return _m_AD__MessageRecord;
-            }
-        }
+        private Dictionary<Type, object> AD__Objects = new();
         private static IADArchitecture __ADinstance = null;
         public static T instance
         {
@@ -716,15 +708,15 @@ namespace AD.BASE
             }
         }
 
-        protected ADMessageRecord MessageRecord { get { return AD__MessageRecord; } }
-
-        #endregion
-
-        #region basefunction 
-        ~ADArchitecture()
+        protected ADMessageRecord MessageRecord
         {
-            Debug.Log(typeof(T).FullName + " is distory");
+            get
+            {
+                AD__Objects.TryAdd(typeof(ADMessageRecord), new ADMessageRecord());
+                return AD__Objects[typeof(ADMessageRecord)] as ADMessageRecord;
+            }
         }
+
         #endregion
 
         #region mFunction
@@ -736,7 +728,7 @@ namespace AD.BASE
 
         public virtual void SaveRecord()
         {
-            AD__MessageRecord?.Save(Path.Combine(Application.persistentDataPath, "AD", this.GetType().Name, DateTime.Now.Ticks.ToString()) + ".AD.log");
+            MessageRecord.Save(Path.Combine(Application.persistentDataPath, "AD", this.GetType().Name, DateTime.Now.Ticks.ToString()) + ".AD.log");
         }
 
         public abstract IBaseMap ToMap();
@@ -751,33 +743,26 @@ namespace AD.BASE
         private IADArchitecture Register<_T>(_T _object) where _T : new()
         {
             var key = typeof(T);
-            AD__Objects.RemoveWhere(T => T == null || T.GetType().Equals(typeof(_T)));
-            AD__Objects.Add(_object);
-            AddMessage(_object.GetType().FullName + " is register");
+            AD__Objects[key] = _object;
+            AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "]");
             return instance;
         }
 
-        private object _tempObject_Get = null;
         private object Get<_T>()
         {
-            if (_tempObject_Get == null || !_tempObject_Get.GetType().Equals(typeof(_T)))
-                _tempObject_Get = AD__Objects.FirstOrDefault(P => P.GetType().Equals(typeof(_T)));
-            if (_tempObject_Get == null) Debug.LogWarning("Obtain null<" + typeof(_T).FullName + ">");
-            return _tempObject_Get;
+            if (AD__Objects.TryGetValue(typeof(T), out var result)) return result;
+            else return null;
         }
 
         public IADArchitecture UnRegister<_T>() where _T : new()
         {
-            AD__Objects.Remove(AD__Objects.FirstOrDefault(T => T.GetType().Equals(typeof(_T))));
+            AD__Objects.Remove(typeof(_T));
             return instance;
         }
 
         public bool Contains<_Type>()
         {
-            if (_tempObject_Get == null || !_tempObject_Get.GetType().Equals(typeof(_Type)))
-                _tempObject_Get = AD__Objects.FirstOrDefault(P => P.GetType().Equals(typeof(_Type)));
-            if (_tempObject_Get == null) return false;
-            return true;
+            return AD__Objects.ContainsKey(typeof(_Type));
         }
 
         public _Model GetModel<_Model>() where _Model : class, IADModel, new()
@@ -876,7 +861,7 @@ namespace AD.BASE
 
         public virtual IADArchitecture AddMessage(string message)
         {
-            AD__MessageRecord?.Add(new ADMessage(message));
+            MessageRecord.Add(new ADMessage(message));
             Debug.Log(message);
             return instance;
         }

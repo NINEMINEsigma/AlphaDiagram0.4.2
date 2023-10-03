@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem.Controls;
 using AD.UI;
+using AD.Utility;
 
 namespace AD
 {
@@ -168,11 +169,13 @@ namespace AD
     {
         #region Attribute
 
+        private static bool AppQuitting = false;
         public static ADGlobalSystem _m_instance = null;
         public static ADGlobalSystem instance
         {
             get
             {
+                if (AppQuitting) return _m_instance;
                 if (_m_instance == null)
                 {
                     var cat = GameObject.FindObjectsOfType(typeof(ADGlobalSystem));
@@ -414,14 +417,14 @@ namespace AD
 
         private void Awake()
         {
-            if (_m_instance != null && _m_instance != this) DestroyImmediate(this);
-            else _m_instance = this;
+            if (_m_instance != null && _m_instance != this) DestroyImmediate(_m_instance.gameObject);
+            _m_instance = this;
         }
 
-        private void Update()
+        private void LateUpdate()
         {
-            if (_m_instance != null && _m_instance != this) DestroyImmediate(this);
-            else if (_m_instance == null) _m_instance = this;
+            if (_m_instance != null && _m_instance != this) DestroyImmediate(_m_instance.gameObject);
+            if (_m_instance == null) _m_instance = this;
             foreach (var key in mulHitControls) key.Update();
             foreach (var key in multipleInputController)
             {
@@ -441,12 +444,8 @@ namespace AD
 
         public void OnApplicationQuit()
         {
+            AppQuitting = true;
             SaveRecord();
-        }
-
-        private void OnDestroy()
-        {
-            _m_instance = null;
         }
 
         #endregion
@@ -1011,6 +1010,15 @@ namespace AD
                 if (GUILayout.Button("SaveRecord"))
                 {
                     that.SaveRecord();
+                }
+            }
+
+            if(GUILayout.Button("Init All ADUI"))
+            {
+                foreach (var item in ADUI.Items)
+                {
+                    if (item.Is<ListView>(out var listView)) listView.Init();
+                    else if (item.Is<Toggle>(out var toggle)) toggle.Init();
                 }
             }
 

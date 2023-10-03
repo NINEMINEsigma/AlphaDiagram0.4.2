@@ -18,14 +18,15 @@ namespace AD.UI
             STRING
         }
 
-        [Header("Animator")]
+        //[Header("Animator")]
         public Animator animator = null;
         public ButtonAnimatorMode ChooseMode= ButtonAnimatorMode.BOOL;
         public string AnimatorBoolString = "IsClick";
         public string AnimatorONString = "In", AnimatorOFFString = "Out";
-        [Header("Event")]
+        //[Header("Event")]
         public ADEvent OnClick = new ADEvent(), OnRelease = new ADEvent();
-        [Header("Setting")]
+        //[Header("Setting")]
+        [SerializeField]
         private bool _IsClick = false;
         public bool IsClick
         {
@@ -50,7 +51,7 @@ namespace AD.UI
                 else OnRelease.Invoke();
             }
         }
-        [Tooltip("false时不会触发任何动画也不会保持按下的状态")]
+        //[Tooltip("false时不会触发任何动画也不会保持按下的状态")]
         public bool IsKeepState = false;
         public TMP_Text title;
 

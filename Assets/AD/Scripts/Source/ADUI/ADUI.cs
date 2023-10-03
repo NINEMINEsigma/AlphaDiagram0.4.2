@@ -121,7 +121,7 @@ namespace AD.UI
             return Event;
         }
 
-        public static ADOrderlyEvent<BaseEventData> InitializeContextSingleEvent(ADOrderlyEvent<BaseEventData> Event, bool isClear = true, params UnityAction<BaseEventData>[] calls)
+        public static ADOrderlyEvent<BaseEventData> InitializeContextSingleEvent(ADOrderlyEvent<BaseEventData> Event, params UnityAction<BaseEventData>[] calls)
         {
             Event ??= new();
             foreach (var call in calls)
@@ -131,7 +131,7 @@ namespace AD.UI
             return Event;
         }
 
-        public static ADOrderlyEvent<AxisEventData> InitializeContextSingleEvent(ADOrderlyEvent<AxisEventData> Event, bool isClear = true, params UnityAction<AxisEventData>[] calls)
+        public static ADOrderlyEvent<AxisEventData> InitializeContextSingleEvent(ADOrderlyEvent<AxisEventData> Event, params UnityAction<AxisEventData>[] calls)
         {
             Event ??= new();
             foreach (var call in calls)

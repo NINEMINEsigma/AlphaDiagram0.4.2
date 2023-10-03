@@ -31,6 +31,19 @@ namespace AD.UI
             set => _Scroll.onValueChanged = value;
         }
 
+        protected override void Start()
+        {
+            base.Start();
+            Init();
+        }
+
+        public void Init()
+        {
+            index = 0;
+            Childs = new();
+            Pool = new();
+        }
+
         public void SetTitle(string title)
         {
             _Title.text = title;

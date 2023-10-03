@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using static System.Net.Mime.MediaTypeNames;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace AD.UI
 {
@@ -52,6 +53,7 @@ namespace AD.UI
             private set
             {
                 _IsCheck = value;
+                tab.gameObject.SetActive(!value);
                 mark.gameObject.SetActive(value);
                 actions.Invoke(value);
             }
@@ -59,7 +61,7 @@ namespace AD.UI
 
         private RegisterInfo __unregisterInfo;
 
-        private ADEvent<bool> actions = new ADEvent<bool>();
+        [SerializeField]private ADEvent<bool> actions = new ADEvent<bool>();
 
         #endregion 
 
@@ -75,12 +77,19 @@ namespace AD.UI
             {
                 if (!Selected) return;
                 IsCheck = !IsCheck;
-            }); 
+            }, PressType.ThisFramePressed); 
         }
         protected void OnDestroy()
         {
             AD.UI.ADUI.Destory(this);
             __unregisterInfo.UnRegister();
+        }
+
+        public void Init()
+        {
+            _IsCheck = false;
+            tab.gameObject.SetActive(true);
+            mark.gameObject.SetActive(false);
         }
 
         #region Function  
