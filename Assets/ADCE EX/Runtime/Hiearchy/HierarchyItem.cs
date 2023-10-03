@@ -8,10 +8,11 @@ namespace AD.Experimental.GameEditor
 {
     public class HierarchyItem : ListViewItem
     {
-        private const float DefaultHight = 20;
-        private const int MaxOpenSingleItemSum = 10;
+        public const float DefaultHight = 20;
+        public const int MaxOpenSingleItemSum = 10;
         [SerializeField] private AD.UI.Toggle ListToggle;
-        [SerializeField] private AD.UI.ListView ListSubListView;
+        public AD.UI.ListView ListSubListView;
+        public int ExtensionOpenSingleItemSum = -1;
 
         RegisterInfo __unregisterInfo, __unregisterInfo_click;
 
@@ -26,11 +27,17 @@ namespace AD.Experimental.GameEditor
             return this;
         }
 
+        public void SetTitle(string title)
+        {
+            ListToggle.SetTitle(title);
+        }
+
         private void InitToggle()
         {
             ListToggle.Init();
             ListToggle.RemoveListener(Refresh);
             ListToggle.AddListener(Refresh);
+            ListToggle.SetTitle("[ N U L L ]");
         }
 
         private void RegisterClickCallback()
@@ -86,7 +93,9 @@ namespace AD.Experimental.GameEditor
             if (ChildItems == null) return;
             int ChildsSum = MatchEditor.MatchTarget.GetChilds().Count;
 
-            MatchEditor.MatchTarget.ParentItem?.MatchEditor.MatchItem.AddRectHightLevel(ChildsSum < MaxOpenSingleItemSum ? ChildsSum : MaxOpenSingleItemSum);
+            MatchEditor.MatchTarget.ParentTarget?.MatchHierarchyEditor.MatchItem.AddRectHightLevel(
+                ChildsSum < (MaxOpenSingleItemSum + ExtensionOpenSingleItemSum)
+                ? ChildsSum : (MaxOpenSingleItemSum + ExtensionOpenSingleItemSum));
             ListSubListView.gameObject.SetActive(true);
             SetUpSubListView();
         }
@@ -103,7 +112,7 @@ namespace AD.Experimental.GameEditor
             foreach (var item in MatchEditor.MatchTarget.GetChilds())
             {
                 var current = ListSubListView.GenerateItem() as HierarchyItem;
-                current.MatchEditor = item.MatchEditor;
+                current.MatchEditor = item.MatchHierarchyEditor;
             }
         }
 

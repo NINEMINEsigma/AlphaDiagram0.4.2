@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6465591658105940704}
   - component: {fileID: 6465591658105940719}
   m_Layer: 5
-  m_Name: HierarchyItemPerfab
+  m_Name: Perfab - HierarchyItem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

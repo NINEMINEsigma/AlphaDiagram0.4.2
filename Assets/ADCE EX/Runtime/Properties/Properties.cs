@@ -3,25 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
 using AD.UI;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace AD.Experimental.GameEditor
 {
     [Serializable]
-    public class HierarchyEditorAssets
+    public class PropertiesEditorAssets
     {
-        public HierarchyItem HierarchyItemPrefab;
-        public ListView HierarchyListView;
+        public PropertiesItem PropertiesItemPrefab;
+        public ListView PropertiesListView;
         public BehaviourContext behaviourContext;
     }
 
-    public class Hierarchy : ADController
+    public class Properties : ADController
     {
-        public HierarchyEditorAssets EditorAssets;
+        public PropertiesEditorAssets EditorAssets;
 
-        public List<ISerializeHierarchyEditor> TargetTopObjectEditors { get; private set; } = new();
+        public List<ISerializePropertiesEditor> TargetTopObjectEditors { get; private set; } = new();
 
         private void Start()
         {
@@ -36,7 +35,7 @@ namespace AD.Experimental.GameEditor
 
         }
 
-        public ISerializeHierarchyEditor this[int index]
+        public ISerializePropertiesEditor this[int index]
         {
             get
             {
@@ -62,18 +61,18 @@ namespace AD.Experimental.GameEditor
             }
         }
 
-        private HierarchyItem RegisterHierarchyItem(ISerializeHierarchyEditor target)
+        private PropertiesItem RegisterHierarchyItem(ISerializePropertiesEditor target)
         {
-            HierarchyItem hierarchyItem = EditorAssets.HierarchyListView.GenerateItem() as HierarchyItem;
-            target.MatchItem = hierarchyItem;
-            hierarchyItem.MatchEditor = target;
+            PropertiesItem propertiesItem = EditorAssets.PropertiesListView.GenerateItem() as PropertiesItem;
+            target.MatchItem = propertiesItem;
+            propertiesItem.MatchEditor = target;
             target.OnSerialize();
-            return hierarchyItem;
+            return propertiesItem;
         }
 
         public void ClearAndRefresh()
         {
-            EditorAssets.HierarchyListView.Clear();
+            EditorAssets.PropertiesListView.Clear();
             foreach (var item in TargetTopObjectEditors)
             {
                 item.MatchItem = RegisterHierarchyItem(item);

@@ -348,6 +348,8 @@ public class ButtonEdior : ADUIEditor
     SerializedProperty IsKeepState;
     SerializedProperty title;
 
+    protected override string TopHeader => "Button Top Header";
+
     protected override void OnEnable()
     {
         base.OnEnable();
