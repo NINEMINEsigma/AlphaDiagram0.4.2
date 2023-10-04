@@ -1,37 +1,11 @@
 using AD.BASE;
 using AD.UI;
-using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Events;
 
-public abstract class IADUIEditor : Editor
+public abstract class AbstractCustomADEditor : Editor
 {
-    private AD.UI.IADUI __target = null;
-
-    private void OnEnable()
-    {
-        this.__target = (AD.UI.IADUI)target;
-    }
-
-    public virtual void OnADUIInspectorGUI()
-    {
-        GUI.enabled = false;
-
-        if (Application.isPlaying)
-        {
-            EditorGUILayout.IntSlider("SerialNumber", __target.SerialNumber, 0, AD.UI.ADUI.TotalSerialNumber - 1);
-            EditorGUILayout.TextField("ElementName", __target.ElementName);
-            //EditorGUILayout.TextField("ElementArea", that.ElementArea);
-        }
-
-        GUI.enabled = true;
-    }
-}
-
-public abstract class ADUIEditor : IADUIEditor
-{
-    private AD.UI.ADUI _target = null;
     protected int currentTab;
 
     /// <summary>
@@ -49,31 +23,12 @@ public abstract class ADUIEditor : IADUIEditor
 
     protected virtual void OnEnable()
     {
-        _target = (AD.UI.ADUI)target;
+
     }
 
-    /// <summary>
-    /// Make ADUI's default InspectorGUI part
-    /// </summary>
-    public override void OnADUIInspectorGUI()
+    public virtual void OnADUIInspectorGUI()
     {
-        if (Application.isPlaying)
-        {
-            GUI.enabled = false;
 
-            GUILayout.BeginHorizontal(EditorStyles.helpBox);
-            EditorGUILayout.IntSlider("SerialNumber", _target.SerialNumber, 0, AD.UI.ADUI.TotalSerialNumber - 1);
-            EditorGUILayout.TextField("ElementName", _target.ElementName);
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal(EditorStyles.helpBox);
-            EditorGUILayout.TextField("ElementArea", _target.ElementArea);
-
-            GUI.enabled = true;
-
-            EditorGUILayout.Toggle("IsSelect", _target.Selected, customSkin.GetStyle("Toggle"));
-            GUILayout.EndHorizontal();
-        }
-        else HelpBox("ADUI Element Detail Will SerializeField When Playing Mode", MessageType.Info);
     }
 
     public void OnNotChangeGUI(UnityAction action)
@@ -83,7 +38,7 @@ public abstract class ADUIEditor : IADUIEditor
         GUI.enabled = true;
     }
 
-    public void HelpBox(string message,MessageType messageType)
+    public void HelpBox(string message, MessageType messageType)
     {
         EditorGUILayout.HelpBox(message, messageType);
     }
@@ -175,6 +130,66 @@ public abstract class ADUIEditor : IADUIEditor
         }
 
         serializedObject.ApplyModifiedProperties();
+    }
+}
+
+public abstract class IADUIEditor : AbstractCustomADEditor
+{
+    private AD.UI.IADUI __target = null;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        this.__target = (AD.UI.IADUI)target;
+    }
+
+    public override void OnADUIInspectorGUI()
+    {
+        GUI.enabled = false;
+
+        if (Application.isPlaying)
+        {
+            EditorGUILayout.IntSlider("SerialNumber", __target.SerialNumber, 0, AD.UI.ADUI.TotalSerialNumber - 1);
+            EditorGUILayout.TextField("ElementName", __target.ElementName);
+            //EditorGUILayout.TextField("ElementArea", that.ElementArea);
+        }
+
+        GUI.enabled = true;
+    }
+}
+
+public abstract class ADUIEditor : IADUIEditor
+{
+    private AD.UI.ADUI _target = null;
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        _target = (AD.UI.ADUI)target;
+    }
+
+    /// <summary>
+    /// Make ADUI's default InspectorGUI part
+    /// </summary>
+    public override void OnADUIInspectorGUI()
+    {
+        if (Application.isPlaying)
+        {
+            GUI.enabled = false;
+
+            GUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.IntSlider("SerialNumber", _target.SerialNumber, 0, AD.UI.ADUI.TotalSerialNumber - 1);
+            EditorGUILayout.TextField("ElementName", _target.ElementName);
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal(EditorStyles.helpBox);
+            EditorGUILayout.TextField("ElementArea", _target.ElementArea);
+
+            GUI.enabled = true;
+
+            EditorGUILayout.Toggle("IsSelect", _target.Selected, customSkin.GetStyle("Toggle"));
+            GUILayout.EndHorizontal();
+        }
+        else HelpBox("ADUI Element Detail Will SerializeField When Playing Mode", MessageType.Info);
     }
 }
 
@@ -434,23 +449,30 @@ public class InputFieldEdior : ADUIEditor
 {
     private AD.UI.InputField that = null;
 
+    SerializedProperty Placeholder;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         that = target as AD.UI.InputField;
+
+        Placeholder = serializedObject.FindProperty("Placeholder");
     }
 
     public override void OnContentGUI()
     {
         EditorGUI.BeginChangeCheck();
-        GUIContent gUIContent = new GUIContent("InputField");
-        string str = EditorGUILayout.TextField(gUIContent, that.text);
-        if (EditorGUI.EndChangeCheck()) that.text = str;
+        string str1 = EditorGUILayout.TextField("InputText", that.text);
+        if (EditorGUI.EndChangeCheck()) that.text = str1;
+
+        EditorGUI.BeginChangeCheck();
+        string str2 = EditorGUILayout.TextField("PlaceholderTexT", that.Placeholder.text);
+        if (EditorGUI.EndChangeCheck()) that.SetPlaceholderText(str2);
     }
 
     public override void OnResourcesGUI()
     {
-
+        EditorGUILayout.PropertyField(Placeholder);
     }
 
     public override void OnSettingsGUI()

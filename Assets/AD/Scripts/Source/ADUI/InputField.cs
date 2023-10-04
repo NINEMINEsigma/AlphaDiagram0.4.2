@@ -16,12 +16,12 @@ namespace AD.UI
         public InputField()
         {
             ElementArea = "InputField";
-            TextProperty = new(this);
         }
 
         protected void Start()
         {
             AD.UI.ADUI.Initialize(this);
+            TextProperty = new(this);
         }
 
         protected void OnDestroy()
@@ -79,14 +79,16 @@ namespace AD.UI
             }
         }
 
-        public BindPropertyJustSet<string> Input
+        public TMP_Text Placeholder;
+
+        public BindPropertyJustSet<string, BindInputFieldAsset> Input
         {
             get
             {
                 return TextProperty.BindJustSet();
             }
         }
-        public BindPropertyJustGet<string> Output
+        public BindPropertyJustGet<string, BindInputFieldAsset> Output
         {
             get
             {
@@ -105,6 +107,31 @@ namespace AD.UI
         {
             get { return source.text; }
             set { source.text = value; }
+        }
+
+        private BindProperty<string> _m_Property = null;
+
+        public void Bind(BindProperty<string> property)
+        {
+            source.onEndEdit.RemoveListener(WhenTextChange);
+            if (_m_Property != null)
+            {
+                source.onEndEdit.RemoveListener(WhenTextChange);
+                source.onEndEdit.AddListener(WhenTextChange);
+                _m_Property.RemoveListenerOnSet(WhenBindSet);
+                property.AddListenerOnSet(WhenBindSet);
+            }
+            _m_Property = property;
+        }
+
+        private void WhenBindSet(string text)
+        {
+            source.text = text;
+        }
+
+        private void WhenTextChange(string text)
+        {
+            _m_Property.Set(text);
         }
 
         public InputField SetText(string text)
@@ -139,10 +166,16 @@ namespace AD.UI
             else if (type == PressType.OnEnd) source.onEndEdit.RemoveAllListeners();
         }
 
+        public void SetPlaceholderText(string text)
+        {
+            Placeholder.text = text;
+        }
+
     }
 
-    public class BindInputFieldAsset : AD.BASE.Property<string>.PropertyAsset
+    public class BindInputFieldAsset : PropertyAsset<string>
     {
+        public BindInputFieldAsset() { }
         public BindInputFieldAsset(InputField source)
         {
             this.source = source;
@@ -153,8 +186,9 @@ namespace AD.UI
         public override string value { get => source.text; set => source.text = value; }
     }
 
-    public class BindInputFieldValueAsset : AD.BASE.Property<float>.PropertyAsset
+    public class BindInputFieldValueAsset : PropertyAsset<float>
     {
+        public BindInputFieldValueAsset() { }
         public BindInputFieldValueAsset(InputField source)
         {
             this.source = source;
@@ -165,7 +199,7 @@ namespace AD.UI
         public override float value { get => float.Parse(source.text); set => source.text = value.ToString(); }
     }
 
-    public class InputFieldProperty : AD.BASE.BindProperty<string>
+    public class InputFieldProperty : AD.BASE.BindProperty<string, BindInputFieldAsset>
     {
         public InputFieldProperty(InputField source)
         {
@@ -173,7 +207,7 @@ namespace AD.UI
         }
     }
 
-    public class InputFieldValueProperty : AD.BASE.BindProperty<float>
+    public class InputFieldValueProperty : AD.BASE.BindProperty<float, BindInputFieldValueAsset>
     {
         public InputFieldValueProperty(InputField source)
         {

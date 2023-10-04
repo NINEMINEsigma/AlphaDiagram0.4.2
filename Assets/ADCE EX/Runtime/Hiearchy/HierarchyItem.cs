@@ -14,14 +14,12 @@ namespace AD.Experimental.GameEditor
         public AD.UI.ListView ListSubListView;
         public int ExtensionOpenSingleItemSum = -1;
 
-        RegisterInfo __unregisterInfo, __unregisterInfo_click;
-
         public ISerializeHierarchyEditor MatchEditor;
 
         public override ListViewItem Init()
         {
             ListSubListView.SetPrefab(GameEditorApp.instance.GetController<Hierarchy>().EditorAssets.HierarchyItemPrefab);
-            RegisterClickCallback();
+            MatchEditor = null;
             InitToggle();
             ClearRectHightLevel();
             return this;
@@ -40,31 +38,24 @@ namespace AD.Experimental.GameEditor
             ListToggle.SetTitle("[ N U L L ]");
         }
 
-        private void RegisterClickCallback()
+        private void Update()
         {
-            __unregisterInfo?.UnRegister();
-            if (__unregisterInfo == null)
-                __unregisterInfo = ADGlobalSystem.AddListener(Mouse.current.rightButton, () =>
-                {
-                    if (!ListToggle.Selected) return;
-                    MatchEditor?.MatchTarget.ClickOnRight();
-                }, PressType.ThisFramePressed);
-            else __unregisterInfo.TryRegister();
+            if (Mouse.current.rightButton.wasPressedThisFrame) OnRightClick();
+        }
 
-            __unregisterInfo_click?.UnRegister();
-            if (__unregisterInfo_click == null)
-                __unregisterInfo_click = ADGlobalSystem.AddListener(Mouse.current.leftButton, () =>
-                {
-                    if (!ListToggle.Selected) return;
-                    MatchEditor?.MatchTarget.ClickOnLeft();
-                }, PressType.ThisFramePressed);
-            else __unregisterInfo_click.TryRegister();
+        private void OnRightClick()
+        {
+            if (!ListToggle.Selected) return;
+            MatchEditor?.MatchTarget.ClickOnLeft();
         }
 
         public void Refresh(bool boolen)
         {
             MatchEditor.IsOpenListView = boolen;
             if (boolen == true) OpenListView(); else CloseListView();
+            MatchEditor?.MatchTarget.ClickOnRight();
+            GameEditorApp.instance.CurrentHierarchyItem = this;
+            GameEditorApp.instance.SendImmediatelyCommand<CurrentItemSelectOnHierarchyPanel>();
         }
 
         public void AddRectHightLevel(int t)

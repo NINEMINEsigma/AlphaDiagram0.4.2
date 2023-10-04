@@ -26,6 +26,8 @@ namespace AD.UI
     [Serializable]
     public abstract class ADUI : MonoBehaviour, IADUI
     {
+        public static ADUI CurrentSelect { get; private set; }
+
         private BehaviourContext _Context;
         public virtual bool IsNeedContext => true;
         public BehaviourContext Context
@@ -51,6 +53,7 @@ namespace AD.UI
         public virtual void OnPointerEnter(PointerEventData eventData)
         {
             Selected = true;
+            CurrentSelect = this;
             UIArea = ElementArea;
         }
 

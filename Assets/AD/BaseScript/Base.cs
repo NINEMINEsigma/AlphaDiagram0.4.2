@@ -7,6 +7,7 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace AD.BASE
 {
@@ -35,7 +36,7 @@ namespace AD.BASE
         #region attribute
 
         protected bool AD__IsCollected { get; set; } = false;
-        private List<string> AD__InjoinedGroup { get; set; } = new List<string>(); 
+        private List<string> AD__InjoinedGroup { get; set; } = new List<string>();
 
         public bool IsCollected
         {
@@ -79,7 +80,7 @@ namespace AD.BASE
         #region attribute
 
         private bool AD__IsCollected { get; set; } = false;
-        private List<string> AD__InjoinedGroup { get; set; } = new List<string>(); 
+        private List<string> AD__InjoinedGroup { get; set; } = new List<string>();
 
         public bool IsCollected
         {
@@ -134,7 +135,7 @@ namespace AD.BASE
     public interface IBaseMap<T> : IBaseMap where T : class, IBase, new()
     {
         void ToObject(out T obj);
-        bool FromObject(T from); 
+        bool FromObject(T from);
     }
 
     public static class CollectionMechanism
@@ -226,11 +227,11 @@ namespace AD.BASE
     {
 
     }
-    public interface ICanInitialize: IAnyArchitecture
+    public interface ICanInitialize : IAnyArchitecture
     {
         void Init();
     }
-    public interface ICanGetArchitecture: IAnyArchitecture
+    public interface ICanGetArchitecture : IAnyArchitecture
     {
         IADArchitecture ADInstance();
         void SetArchitecture(IADArchitecture target);
@@ -483,7 +484,7 @@ namespace AD.BASE
         void Trigger();
     }
 
-    public interface IADCommand : ICanGetArchitecture, ICanGetModel,ICanGetController
+    public interface IADCommand : ICanGetArchitecture, ICanGetModel, ICanGetController
     {
         void Execute();
         string LogMessage();
@@ -507,7 +508,7 @@ namespace AD.BASE
 
         public virtual string LogMessage()
         {
-            return this.GetType().FullName;
+            return this.GetType().FullName + "(Command) is been send";
         }
 
         public abstract void OnExecute();
@@ -669,9 +670,13 @@ namespace AD.BASE
 
         public virtual void Save(string path)
         {
-            AD.BASE.FileC.TryCreateDirectroryOfFile(path); 
+            AD.BASE.FileC.TryCreateDirectroryOfFile(path);
             string message = What();
-            File.WriteAllText(path, message, Encoding.UTF8);
+            using (FileStream fs = File.Create(path))
+            {
+                byte[] info = Encoding.Default.GetBytes(message);
+                fs.Write(info, 0, info.Length);
+            }
         }
 
         public virtual IADModel Load(string path)
@@ -742,15 +747,19 @@ namespace AD.BASE
 
         private IADArchitecture Register<_T>(_T _object) where _T : new()
         {
-            var key = typeof(T);
+            var key = typeof(_T);
+            bool boolen = AD__Objects.ContainsKey(key);
             AD__Objects[key] = _object;
-            AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "]");
+            if (boolen)
+                AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "] again");
+            else
+                AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "]");
             return instance;
         }
 
         private object Get<_T>()
         {
-            if (AD__Objects.TryGetValue(typeof(T), out var result)) return result;
+            if (AD__Objects.TryGetValue(typeof(_T), out var result)) return result;
             else return null;
         }
 
@@ -913,8 +922,8 @@ namespace AD.BASE
         IADArchitecture this[Type type] { get; }
     }
 
-    public abstract class TopArchitecture<T,_Entry,_MainPage,_EndPage,_SubPages> 
-        : ADArchitecture<T> 
+    public abstract class TopArchitecture<T, _Entry, _MainPage, _EndPage, _SubPages>
+        : ADArchitecture<T>
         where T : TopArchitecture<T, _Entry, _MainPage, _EndPage, _SubPages>, new()
         where _Entry : IADArchitecture
         where _MainPage : IADArchitecture
@@ -933,7 +942,7 @@ namespace AD.BASE
                 if (type == typeof(_Entry)) return EntryArchitecture;
                 else if (type == typeof(_MainPage)) return MainArchitecture;
                 else if (type == typeof(_EndPage)) return EndArchitecture;
-                else return SubArchitectures[type]; 
+                else return SubArchitectures[type];
             }
         }
     }
@@ -2140,76 +2149,76 @@ namespace AD.BASE
 
     #region Property 
 
-    public interface IPropertyHasGet<T>
+    public interface IPropertyHasGet<T, P> where P : PropertyAsset<T>, new()
     {
-        AbstractBindProperty<T> Property { get; }
+        AbstractBindProperty<T, P> Property { get; }
     }
-    public interface IPropertyHasSet<T>
+    public interface IPropertyHasSet<T, P> where P : PropertyAsset<T>, new()
     {
-        AbstractBindProperty<T> Property { get; }
+        AbstractBindProperty<T, P> Property { get; }
     }
 
-    public class Property<T>
+    public interface IPropertyHasGet<T> : IPropertyHasGet<T, PropertyAsset<T>> 
     {
-        public class PropertyAsset
+
+    }
+    public interface IPropertyHasSet<T> : IPropertyHasGet<T, PropertyAsset<T>>
+    {
+
+    }
+
+    public class PropertyAsset<T>
+    {
+        public PropertyAsset()
         {
-            public PropertyAsset()
-            {
-            }
-            public PropertyAsset(T from)
-            {
-                value = from;
-            }
-
-            public ADOrderlyEvent<T> OnDestory = null;
-            public virtual T value { get; set; } = default;
+        }
+        public PropertyAsset(T from)
+        {
+            value = from;
         }
 
+        public ADOrderlyEvent<T> OnDestory = null;
+        public virtual T value { get; set; } = default;
+    }
+
+    public class Property<T, P> where P : PropertyAsset<T>, new()
+    {
         internal ADOrderlyEvent _m_get = null;
         internal ADOrderlyEvent<T> _m_set = null;
         internal ADOrderlyEvent<T> _m_set_same = null;
-        internal PropertyAsset _m_data = null;
+        internal P _m_data = null;
         public bool IsHaveValue => _m_data != null;
 
         public Property(ADOrderlyEvent<T> set, T data)
         {
             _m_set = set ?? throw new ArgumentNullException(nameof(set));
-            _m_data = new PropertyAsset(data);
+            _m_data = new P();
+            _m_data.value = data;
         }
         public Property(T data)
         {
-            _m_data = new PropertyAsset(data);
+            _m_data = new P();
+            _m_data.value = data;
         }
         public Property()
         {
         }
 
-        public T Set(T _Right = default)
+        public T Set(T _Right)
         {
-            if (_Right.Equals(default))
+            if (_m_data != null)
             {
-                if (_m_data == null)
+                if (_m_data.value.Equals(_Right))
                     _m_set_same?.Invoke(_Right);
                 else
-                {
-                    _m_data.OnDestory?.Invoke(_Right);
                     _m_set?.Invoke(_Right);
-                }
-                _m_data = null;
-                return _Right;
             }
             else
             {
-                if (_m_data != null)
-                    if (_m_data.value.Equals(_Right))
-                        _m_set_same?.Invoke(_Right);
-                    else
-                    {
-                        _m_data = new PropertyAsset();
-                        _m_set?.Invoke(_Right);
-                    }
-                _m_data.value = _Right;
+                _m_data = new P();
+                _m_set?.Invoke(_Right);
             }
+            _m_data.value = _Right;
             return _Right;
         }
 
@@ -2294,7 +2303,7 @@ namespace AD.BASE
             return _m_get?.InvokeArray;
         }
 
-        public bool Equals(Property<T> _Right)
+        public bool Equals(Property<T, P> _Right)
         {
             return Get().Equals(_Right.Get());
         }
@@ -2320,9 +2329,9 @@ namespace AD.BASE
         }
     }
 
-    public abstract class AbstractBindProperty<T>
+    public abstract class AbstractBindProperty<T, P> where P : PropertyAsset<T>, new()
     {
-        internal Property<T> _m_value = new Property<T>();
+        internal Property<T, P> _m_value = new Property<T, P>();
         internal T value
         {
             get
@@ -2335,88 +2344,92 @@ namespace AD.BASE
             }
         }
 
-        protected void SetPropertyAsset(Property<T>.PropertyAsset asset)
+        protected void SetPropertyAsset(P asset)
+        {
+            _m_value._m_data = asset;
+        }
+        internal void _SetPropertyAsset(P asset)
         {
             _m_value._m_data = asset;
         }
 
         #region Func
 
-        public AbstractBindProperty<T> Init()
+        public AbstractBindProperty<T, P> Init()
         {
             _m_value.Init();
             return this;
         }
 
-        public void TrackThisShared(AbstractBindProperty<T> OtherProperty)
+        public void TrackThisShared(AbstractBindProperty<T, P> OtherProperty)
         {
             this._m_value = OtherProperty._m_value;
         }
 
         protected void Init(T _init)
         {
-            _m_value = new Property<T>(_init);
+            _m_value = new Property<T, P>(_init);
         }
 
-        internal AbstractBindProperty<T> AddListenerOnSet(UnityAction<T> action)
+        internal AbstractBindProperty<T, P> AddListenerOnSet(UnityAction<T> action)
         {
             _m_value.AddListenerOnSet(action);
             return this;
         }
-        internal AbstractBindProperty<T> AddListenerOnSetSame(UnityAction<T> action)
+        internal AbstractBindProperty<T, P> AddListenerOnSetSame(UnityAction<T> action)
         {
             _m_value.AddListenerOnSetSame(action);
             return this;
         }
-        internal AbstractBindProperty<T> AddListenerOnGet(UnityAction action)
+        internal AbstractBindProperty<T, P> AddListenerOnGet(UnityAction action)
         {
             _m_value.AddListenerOnGet(action);
             return this;
         }
 
-        internal AbstractBindProperty<T> RemoveListenerOnSet(UnityAction<T> action)
+        internal AbstractBindProperty<T, P> RemoveListenerOnSet(UnityAction<T> action)
         {
             _m_value.RemoveListenerOnSet(action);
             return this;
         }
-        internal AbstractBindProperty<T> RemoveListenerOnSetSame(UnityAction<T> action)
+        internal AbstractBindProperty<T, P> RemoveListenerOnSetSame(UnityAction<T> action)
         {
             _m_value.RemoveListenerOnSetSame(action);
             return this;
         }
-        internal AbstractBindProperty<T> RemoveListenerOnGet(UnityAction action)
+        internal AbstractBindProperty<T, P> RemoveListenerOnGet(UnityAction action)
         {
             _m_value.RemoveListenerOnGet(action);
             return this;
         }
 
-        internal AbstractBindProperty<T> RemoveListenerOnSet()
+        internal AbstractBindProperty<T, P> RemoveListenerOnSet()
         {
             _m_value.RemoveListenerOnSet();
             return this;
         }
-        internal AbstractBindProperty<T> RemoveListenerOnSetSame()
+        internal AbstractBindProperty<T, P> RemoveListenerOnSetSame()
         {
             _m_value.RemoveListenerOnSetSame();
             return this;
         }
-        internal AbstractBindProperty<T> RemoveListenerOnGet()
+        internal AbstractBindProperty<T, P> RemoveListenerOnGet()
         {
             _m_value.RemoveListenerOnGet();
             return this;
         }
 
-        internal AbstractBindProperty<T> SortOnSet(IComparer<int> comparer)
+        internal AbstractBindProperty<T, P> SortOnSet(IComparer<int> comparer)
         {
             _m_value.SortOnSet(comparer);
             return this;
         }
-        internal AbstractBindProperty<T> SortOnSetSame(IComparer<int> comparer)
+        internal AbstractBindProperty<T, P> SortOnSetSame(IComparer<int> comparer)
         {
             _m_value.SortOnSetSame(comparer);
             return this;
         }
-        internal AbstractBindProperty<T> SortOnGet(IComparer<int> comparer)
+        internal AbstractBindProperty<T, P> SortOnGet(IComparer<int> comparer)
         {
             _m_value.SortOnGet(comparer);
             return this;
@@ -2437,7 +2450,7 @@ namespace AD.BASE
 
         #endregion
 
-        public bool Equals(AbstractBindProperty<T> _Right)
+        public bool Equals(AbstractBindProperty<T, P> _Right)
         {
             if (!(_Right._m_value.IsHaveValue || this._m_value.IsHaveValue)) return true;
             else if (_Right._m_value.IsHaveValue != this._m_value.IsHaveValue) return false;
@@ -2476,146 +2489,219 @@ namespace AD.BASE
         }
     }
 
-    public class BindProperty<T> : AbstractBindProperty<T>, IPropertyHasGet<T>, IPropertyHasSet<T>
+    public class BindProperty<T, P> : AbstractBindProperty<T, P>, IPropertyHasGet<T, P>, IPropertyHasSet<T, P> where P : PropertyAsset<T>, new()
     {
-        public AbstractBindProperty<T> Property => this;
+        public AbstractBindProperty<T, P> Property => this;
 
-        public BindPropertyJustGet<T> BindJustGet()
+        public BindPropertyJustGet<T, P> BindJustGet()
         {
-            BindPropertyJustGet<T> get = new BindPropertyJustGet<T>();
+            BindPropertyJustGet<T, P> get = new BindPropertyJustGet<T, P>();
             get.TrackThisShared(this);
             return get;
         }
 
-        public BindPropertyJustSet<T> BindJustSet()
+        public BindPropertyJustSet<T, P> BindJustSet()
         {
-            BindPropertyJustSet<T> get = new BindPropertyJustSet<T>();
+            BindPropertyJustSet<T, P> get = new BindPropertyJustSet<T, P>();
             get.TrackThisShared(this);
             return get;
         }
     }
 
-    public class BindPropertyJustGet<T> : AbstractBindProperty<T>, IPropertyHasGet<T>
+    public class BindPropertyJustGet<T, P> : AbstractBindProperty<T, P>, IPropertyHasGet<T, P> where P : PropertyAsset<T>, new()
     {
-        public AbstractBindProperty<T> Property => this;
+        public AbstractBindProperty<T, P> Property => this;
     }
 
-    public class BindPropertyJustSet<T> : AbstractBindProperty<T>, IPropertyHasSet<T>
+    public class BindPropertyJustSet<T, P> : AbstractBindProperty<T, P>, IPropertyHasSet<T, P> where P : PropertyAsset<T>, new()
     {
-        public AbstractBindProperty<T> Property => this;
+        public AbstractBindProperty<T, P> Property => this;
+    }
+
+    public class BindProperty<T> : BindProperty<T, PropertyAsset<T>>
+    {
+
+    }
+
+    public class BindPropertyJustGet<T> : BindPropertyJustGet<T, PropertyAsset<T>>
+    {
+
+    }
+
+    public class BindPropertyJustSet<T> : BindPropertyJustSet<T, PropertyAsset<T>>
+    {
+
     }
 
     public static class PropertyExtension
     {
-        public static T GetOriginal<T>(this IPropertyHasGet<T> self)
+        public static T GetOriginal<T, P>(this IPropertyHasGet<T, P> self) where P : PropertyAsset<T>, new()
         {
             return self.Property._m_value._m_data.value;
         }
 
-        public static T SetOriginal<T>(this IPropertyHasSet<T> self, T value)
+        public static T SetOriginal<T, P>(this IPropertyHasSet<T, P> self, T value) where P : PropertyAsset<T>, new()
         {
             self.Property._m_value._m_data.value = value;
             return self.Property._m_value._m_data.value;
         }
 
-        public static IPropertyHasSet<T> AddListenerOnSet<T>(this IPropertyHasSet<T> self, UnityAction<T> action)
+        public static IPropertyHasSet<T, P> AddListenerOnSet<T, P>(this IPropertyHasSet<T, P> self, UnityAction<T> action) where P : PropertyAsset<T>, new()
         {
             self.Property.AddListenerOnSet(action);
             return self;
         }
 
-        public static IPropertyHasSet<T> AddListenerOnSetSame<T>(this IPropertyHasSet<T> self, UnityAction<T> action)
+        public static IPropertyHasSet<T, P> AddListenerOnSetSame<T, P>(this IPropertyHasSet<T, P> self, UnityAction<T> action) where P : PropertyAsset<T>, new()
         {
             self.Property.AddListenerOnSetSame(action);
             return self;
         }
 
-        public static IPropertyHasGet<T> AddListenerOnGet<T>(this IPropertyHasGet<T> self, UnityAction action)
+        public static IPropertyHasGet<T, P> AddListenerOnGet<T, P>(this IPropertyHasGet<T, P> self, UnityAction action) where P : PropertyAsset<T>, new()
         {
             self.Property.AddListenerOnGet(action);
             return self;
         }
 
-        public static IPropertyHasSet<T> RemoveListenerOnSet<T>(this IPropertyHasSet<T> self, UnityAction<T> action)
+        public static IPropertyHasSet<T, P> RemoveListenerOnSet<T, P>(this IPropertyHasSet<T, P> self, UnityAction<T> action) where P : PropertyAsset<T>, new()
         {
             self.Property.RemoveListenerOnSet(action);
             return self;
         }
 
-        public static IPropertyHasSet<T> RemoveListenerOnSetSame<T>(this IPropertyHasSet<T> self, UnityAction<T> action)
+        public static IPropertyHasSet<T, P> RemoveListenerOnSetSame<T, P>(this IPropertyHasSet<T, P> self, UnityAction<T> action) where P : PropertyAsset<T>, new()
         {
             self.Property.RemoveListenerOnSetSame(action);
             return self;
         }
 
-        public static IPropertyHasGet<T> RemoveListenerOnGet<T>(this IPropertyHasGet<T> self, UnityAction action)
+        public static IPropertyHasGet<T, P> RemoveListenerOnGet<T, P>(this IPropertyHasGet<T, P> self, UnityAction action) where P : PropertyAsset<T>, new()
         {
             self.Property.RemoveListenerOnGet(action);
             return self;
         }
 
-        public static IPropertyHasSet<T> RemoveListenerOnSet<T>(this IPropertyHasSet<T> self)
+        public static IPropertyHasSet<T, P> RemoveListenerOnSet<T, P>(this IPropertyHasSet<T, P> self) where P : PropertyAsset<T>, new()
         {
             self.RemoveListenerOnSet();
             return self;
         }
 
-        public static IPropertyHasSet<T> RemoveListenerOnSetSame<T>(this IPropertyHasSet<T> self)
+        public static IPropertyHasSet<T, P> RemoveListenerOnSetSame<T, P>(this IPropertyHasSet<T, P> self) where P : PropertyAsset<T>, new()
         {
             self.RemoveListenerOnSetSame();
             return self;
         }
 
-        public static IPropertyHasGet<T> RemoveListenerOnGet<T>(this IPropertyHasGet<T> self)
+        public static IPropertyHasGet<T, P> RemoveListenerOnGet<T, P>(this IPropertyHasGet<T, P> self) where P : PropertyAsset<T>, new()
         {
             self.RemoveListenerOnGet();
             return self;
         }
 
-        public static IPropertyHasSet<T> SortOnSet<T>(this IPropertyHasSet<T> self, IComparer<int> comparer)
+        public static IPropertyHasSet<T, P> SortOnSet<T, P>(this IPropertyHasSet<T, P> self, IComparer<int> comparer) where P : PropertyAsset<T>, new()
         {
             self.SortOnSet(comparer);
             return self;
         }
 
-        public static IPropertyHasSet<T> SortOnSetSame<T>(this IPropertyHasSet<T> self, IComparer<int> comparer)
+        public static IPropertyHasSet<T, P> SortOnSetSame<T, P>(this IPropertyHasSet<T, P> self, IComparer<int> comparer) where P : PropertyAsset<T>, new()
         {
             self.SortOnSetSame(comparer);
             return self;
         }
 
-        public static IPropertyHasGet<T> SortOnGet<T>(this IPropertyHasGet<T> self, IComparer<int> comparer)
+        public static IPropertyHasGet<T, P> SortOnGet<T, P>(this IPropertyHasGet<T, P> self, IComparer<int> comparer) where P : PropertyAsset<T>, new()
         {
             self.SortOnGet(comparer);
             return self;
         }
 
-        public static List<int> IndexArrayOnSet<T>(this IPropertyHasSet<T> self)
+        public static List<int> IndexArrayOnSet<T, P>(this IPropertyHasSet<T, P> self) where P : PropertyAsset<T>, new()
         {
             return self.IndexArrayOnSet();
         }
 
-        public static List<int> IndexArrayOnSetSame<T>(this IPropertyHasSet<T> self)
+        public static List<int> IndexArrayOnSetSame<T, P>(this IPropertyHasSet<T, P> self) where P : PropertyAsset<T>, new()
         {
             return self.IndexArrayOnSetSame();
         }
 
-        public static List<int> IndexArrayOnGet<T>(this IPropertyHasGet<T> self)
+        public static List<int> IndexArrayOnGet<T, P>(this IPropertyHasGet<T, P> self) where P : PropertyAsset<T>, new()
         {
             return self.IndexArrayOnGet();
         }
 
-        public static T Get<T>(this IPropertyHasGet<T> self)
+        public static T Get<T, P>(this IPropertyHasGet<T, P> self) where P : PropertyAsset<T>, new()
         {
             return self.Property._m_value.Get();
         }
 
-        public static T Set<T>(this IPropertyHasSet<T> self, T value)
+        public static T Set<T, P>(this IPropertyHasSet<T, P> self, T value) where P : PropertyAsset<T>, new()
         {
             return self.Property._m_value.Set(value);
         }
 
+        public static void BindToValue(BindProperty<string> stringProperty, BindProperty<float> valueProperty)
+        {
+            stringProperty._SetPropertyAsset(new ValueToStringPropertyAsset(valueProperty._m_value._m_data));
+        }
 
+        public static void BindToValue( BindProperty<float> valueProperty,BindProperty<string> stringProperty)
+        {
+            valueProperty._SetPropertyAsset(new StringToValuePropertyAsset(stringProperty._m_value._m_data));
+        }
+
+        internal class ValueToStringPropertyAsset : PropertyAsset<string>
+        {
+            public ValueToStringPropertyAsset() { throw new ADException("ValueToStringPropertyAsset"); }
+            public ValueToStringPropertyAsset(PropertyAsset<float> from)
+            {
+                this.from = from;
+            }
+
+            PropertyAsset<float> from;
+
+            public override string value
+            {
+                get
+                {
+                    return from.value.ToString();
+                }
+                set
+                {
+                    if (float.TryParse(value, out float val))
+                        from.value = val;
+                    else from.value = 0;
+                }
+            }
+        }
+
+        internal class StringToValuePropertyAsset : PropertyAsset<float>
+        {
+            public StringToValuePropertyAsset() { throw new ADException("StringToValuePropertyAsset"); }
+            public StringToValuePropertyAsset(PropertyAsset<string> from)
+            {
+                this.from = from;
+            }
+
+            PropertyAsset<string> from;
+
+            public override float value
+            {
+                get
+                {
+                    if (float.TryParse(from.value, out float val))
+                        return val;
+                    else return 0;
+                }
+                set
+                {
+                    from.value = value.ToString();
+                }
+            }
+        }
     }
 
     #endregion
@@ -2626,10 +2712,11 @@ namespace AD.BASE
     {
         public static T As<T>(this object self) where T : class
         {
+            if (self == null) throw new ADException("Now As.self is null");
             return self as T;
         }
 
-        public static bool As<T>(this object self,out T result) where T : class
+        public static bool As<T>(this object self, out T result) where T : class
         {
             if (self != null)
             {
@@ -2640,7 +2727,7 @@ namespace AD.BASE
             {
                 result = null;
                 return false;
-            } 
+            }
         }
 
         public static bool Convertible<T>(this object self) where T : class
@@ -2652,7 +2739,7 @@ namespace AD.BASE
             else return false;
         }
 
-        public static bool Is<T>(this object self,out T result) where T : class
+        public static bool Is<T>(this object self, out T result) where T : class
         {
             result = null;
             if (self is T r)
@@ -2660,12 +2747,12 @@ namespace AD.BASE
                 result = r;
                 return true;
             }
-            else return false; 
+            else return false;
         }
 
-        public static bool IsAssignableFromOrSubClass(this Type self,Type target)
+        public static bool IsAssignableFromOrSubClass(this Type self, Type target)
         {
-            return self.IsAssignableFrom(target)||self.IsSubclassOf(target);
+            return self.IsAssignableFrom(target) || self.IsSubclassOf(target);
         }
 
     }

@@ -13,13 +13,13 @@ namespace AD.UI
         public Text()
         {
             ElementArea = "Text";
-            TextProperty = new(this);
-            ValueProperty = new(this);
         }
 
         protected void Start()
         {
             AD.UI.ADUI.Initialize(this);
+            TextProperty = new(this);
+            ValueProperty = new(this);
         }
         protected void OnDestory()
         {
@@ -113,8 +113,9 @@ namespace AD.UI
 
     }
 
-    public class BindTextAsset : AD.BASE.Property<string>.PropertyAsset
+    public class BindTextAsset : PropertyAsset<string>
     {
+        public BindTextAsset() { }
         public BindTextAsset(Text source)
         {
             this.source = source;
@@ -125,8 +126,9 @@ namespace AD.UI
         public override string value { get => source.text; set => source.text = value; }
     }
 
-    public class BindTextValueAsset : AD.BASE.Property<float>.PropertyAsset
+    public class BindTextValueAsset : PropertyAsset<float>
     {
+        public BindTextValueAsset() { }
         public BindTextValueAsset(Text source)
         {
             this.source = source;
@@ -153,7 +155,7 @@ namespace AD.UI
         }
     }
 
-    public class TextProperty : AD.BASE.BindProperty<string>
+    public class TextProperty : AD.BASE.BindProperty<string, BindTextAsset>
     {
         public TextProperty(Text source)
         {
@@ -161,7 +163,7 @@ namespace AD.UI
         }
     }
 
-    public class TextValueProperty : AD.BASE.BindProperty<float>
+    public class TextValueProperty : AD.BASE.BindProperty<float, BindTextValueAsset>
     {
         public TextValueProperty(Text source)
         {

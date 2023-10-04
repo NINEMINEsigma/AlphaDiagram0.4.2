@@ -14,6 +14,7 @@ namespace AD.Experimental.GameEditor
         public PropertiesItem PropertiesItemPrefab;
         public ListView PropertiesListView;
         public BehaviourContext behaviourContext;
+        public AD.Experimental.GameEditor.GUISkin CustomSkin;
     }
 
     public class Properties : ADController
@@ -26,14 +27,14 @@ namespace AD.Experimental.GameEditor
         private void Start()
         {
             GameEditorApp.instance.RegisterController(this);
-
-            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
-            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
         }
 
         public override void Init()
         {
+            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
+            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
+            AD.Experimental.GameEditor.GUI.skin = EditorAssets.CustomSkin;
         }
 
         public ISerializePropertiesEditor this[int index]
@@ -49,11 +50,7 @@ namespace AD.Experimental.GameEditor
             }
             set
             {
-                if (index == -1)
-                {
-                    CurrentPropertiesEditors.Add(value);
-                }
-                else if (index < 0 || index > CurrentPropertiesEditors.Count)
+                if (index < 0 || index >= CurrentPropertiesEditors.Count)
                 {
                     Debug.LogError("Over Bound");
                     return;
@@ -74,17 +71,28 @@ namespace AD.Experimental.GameEditor
         public void ClearAndRefresh()
         {
             EditorAssets.PropertiesListView.Clear();
-            foreach (var item in CurrentPropertiesEditors)
+            if (MatchTarget != null)
             {
-                item.MatchItem = RegisterHierarchyItem(item);
+                foreach (var target in CurrentPropertiesEditors)
+                {
+                    RegisterHierarchyItem(target).SortIndex = target.SerializeIndex;
+                    target.OnSerialize();
+
+                }
+                EditorAssets.PropertiesListView.SortChilds();
             }
         }
 
         public void RefreshPanel(PointerEventData axisEventData)
         {
-            foreach (var target in CurrentPropertiesEditors)
+            if (MatchTarget != null)
             {
-                target.OnSerialize();
+                foreach (var target in CurrentPropertiesEditors)
+                {
+                    target.OnSerialize();
+                    target.MatchItem.SortIndex = target.SerializeIndex;
+                }
+                EditorAssets.PropertiesListView.SortChilds();
             }
         }
     }

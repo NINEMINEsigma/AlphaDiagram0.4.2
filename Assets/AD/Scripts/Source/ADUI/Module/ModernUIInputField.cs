@@ -79,14 +79,14 @@ namespace AD.UI
                 AnimateIn();
         }
 
-        public BindPropertyJustSet<string> Input
+        public BindPropertyJustSet<string, BindInputFieldAsset> Input
         {
             get
             {
                 return TextProperty.BindJustSet();
             }
         }
-        public BindPropertyJustGet<string> Output
+        public BindPropertyJustGet<string, BindInputFieldAsset> Output
         {
             get
             {

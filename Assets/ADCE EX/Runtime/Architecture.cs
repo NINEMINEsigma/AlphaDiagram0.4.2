@@ -19,6 +19,18 @@ namespace AD.Experimental.GameEditor
             throw new System.NotImplementedException();
         }
 
+        public override void Init()
+        {
+            ListView.StaticSortChildPredicate = ItemSorting;
+        }
+
+        private int ItemSorting(GameObject _Left,GameObject _Right)
+        {
+            return _Left.GetComponent<ListViewItem>().SortIndex.CompareTo(_Right.GetComponent<ListViewItem>().SortIndex);
+        }
+
+        public HierarchyItem CurrentHierarchyItem;
+
     }
 
     public static class CustomEditorUtility
@@ -65,10 +77,23 @@ namespace AD.Experimental.GameEditor
         }
     }
 
+    public class CurrentItemSelectOnHierarchyPanel : ADCommand
+    {
+        public override void OnExecute()
+        {
+            var cat = Architecture.As<GameEditorApp>().CurrentHierarchyItem;
+            if (cat != null)
+            {
+                Architecture.GetController<Properties>().MatchTarget = cat.MatchEditor.MatchTarget;
+                Architecture.GetController<Properties>().ClearAndRefresh();
+            }
+        }
+    }
+
     public interface ICanSerialize
     {
-        //根据MatchObject进行实际操作
         void OnSerialize();
+        int SerializeIndex { get; }
     }
 
     public interface ISerializeHierarchyEditor: ICanSerialize
@@ -86,9 +111,10 @@ namespace AD.Experimental.GameEditor
         List<ICanSerializeOnCustomEditor> GetChilds();
         void ClickOnLeft();
         void ClickOnRight();
+        int SerializeIndex { get; }
     }
 
-    public interface ISerializePropertiesEditor: ICanSerialize
+    public interface ISerializePropertiesEditor : ICanSerialize
     {
         PropertiesItem MatchItem { get; set; }
         ICanSerializeOnCustomEditor MatchTarget { get; }

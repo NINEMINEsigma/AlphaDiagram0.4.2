@@ -27,7 +27,7 @@ namespace AD.Experimental.Localization.Cache
     /// </summary>
     /// <typeparam name="T">目标对象类型</typeparam>
     /// <typeparam name="P">目标对象的IBaseMap类型</typeparam>
-    public interface ICanCacheData<T,P> : IBaseMap<T>
+    public interface ICanCacheData<T, P> : IBaseMap<T>
         where T : class, IBase<P>, new()
         where P : class, IBaseMap, new()
     {
@@ -40,7 +40,7 @@ namespace AD.Experimental.Localization.Cache
     /// </summary>
     public class CacheAssetsKey
     {
-        public CacheAssetsKey(string key) 
+        public CacheAssetsKey(string key)
         {
             IdentifyID = key;
         }
@@ -70,16 +70,16 @@ namespace AD.Experimental.Localization.Cache
     /// <summary>
     /// 能够保存自身的Key值，以稳定自身在Assets中的环境和依赖于此的其他对象
     /// </summary>
-    public interface ICanBeCatched
+    public interface ICanBeCatched<P> where P : PropertyAsset<string>, new()
     {
-        IPropertyHasGet<string> CacheKey { get; }
+        IPropertyHasGet<string, P> CacheKey { get; }
     }
-    
+
     /// <summary>
     /// 这个类的缓存方式使用IBase&IBaseMap的虚拟的序列化和反序列化方式来实现本地化和内存化
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractCache<T,P> : ICanCacheData<T,P>, ICanBeCatched
+    public abstract class AbstractCache<T, P> : ICanCacheData<T, P>, ICanBeCatched<PropertyAsset<string>>
         where T : class, IBase<P>, new()
         where P : class, IBaseMap<T>, new()
     {
@@ -95,7 +95,7 @@ namespace AD.Experimental.Localization.Cache
             BindKey.SetOriginal(key);
         }
 
-        public IPropertyHasGet<string> CacheKey => BindKey;
+        public IPropertyHasGet<string, PropertyAsset<string>> CacheKey => BindKey;
 
         protected BindProperty<string> BindKey;
 
@@ -114,7 +114,7 @@ namespace AD.Experimental.Localization.Cache
         public BindProperty<P> MatchElementBM { get; set; }
 
         public virtual bool Deserialize(string source)
-        { 
+        {
             if (MatchElementBM.Get().Deserialize(source))
             {
                 MatchElementBM.Get().ToObject(out var target);
@@ -229,7 +229,7 @@ namespace AD.Experimental.Localization.Cache
         public bool TryGetValue(CacheAssetsKey key, out ICanCacheData<T, P> result)
         {
             return datas.TryGetValue(key, out result);
-        } 
+        }
 
         public bool Contains(ICanCacheData<T, P> value)
         {
@@ -242,7 +242,7 @@ namespace AD.Experimental.Localization.Cache
             bool isFind = false;
             foreach (var data in datas)
             {
-                if(data.Value.Equals(value))
+                if (data.Value.Equals(value))
                 {
                     result ??= new();
                     result.Add(data.Key);

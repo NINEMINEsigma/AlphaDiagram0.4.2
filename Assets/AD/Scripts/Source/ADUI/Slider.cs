@@ -213,8 +213,9 @@ namespace AD.UI
 
     }
 
-    public class BindSliderAsset : AD.BASE.Property<float>.PropertyAsset
+    public class BindSliderAsset : PropertyAsset<float>
     {
+        public BindSliderAsset() { }
         public BindSliderAsset(Slider source)
         {
             this.source = source;

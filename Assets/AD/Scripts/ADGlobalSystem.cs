@@ -992,9 +992,10 @@ namespace AD
 
             EditorGUI.BeginChangeCheck();
             ADGlobalSystem temp_cat = null;
-            GUIContent gUIContent = new GUIContent("Instance");
-            temp_cat = EditorGUILayout.ObjectField(gUIContent, ADGlobalSystem._m_instance, typeof(ADGlobalSystem), @object) as ADGlobalSystem;
+            temp_cat = EditorGUILayout.ObjectField("Instance", ADGlobalSystem._m_instance, typeof(ADGlobalSystem), @object) as ADGlobalSystem;
             if (EditorGUI.EndChangeCheck()) ADGlobalSystem._m_instance = temp_cat;
+
+            EditorGUILayout.ObjectField("CurrentADUI", ADUI.CurrentSelect, typeof(ADUI), @object);
 
             if (Application.isPlaying)
             {

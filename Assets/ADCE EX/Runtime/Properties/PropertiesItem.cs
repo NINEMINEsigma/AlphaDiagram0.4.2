@@ -12,15 +12,24 @@ namespace AD.Experimental.GameEditor
         public const float DefaultRectHightLevelSize = 20;
 
         [SerializeField] AD.UI.Toggle Lock_Tilie_Toggle;
+        [SerializeField] RectTransform SubPage;
+        [SerializeField] RectTransform SubLinePerfab;
 
         private bool IsLock = false;
 
         public ISerializePropertiesEditor MatchEditor;
 
+        [SerializeField] private List<GameObject> Lines = new();
+
         public override ListViewItem Init()
         {
             InitToggle();
+            IsLock = false;
             ClearRectHightLevel();
+            foreach (var obj in Lines)
+            {
+                GameObject.Destroy(obj);
+            }
             return this;
         }
 
@@ -52,6 +61,16 @@ namespace AD.Experimental.GameEditor
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultRectHightLevelSize);
+        }
+
+        public RectTransform AddNewLevelLine()
+        {
+            AddRectHightLevel();
+            Lines.Add(GameObject.Instantiate(SubLinePerfab.gameObject,SubPage));
+            GameObject obj = Lines[^1];
+            RectTransform result = obj.GetComponent<RectTransform>();
+            result.sizeDelta = new Vector2(result.sizeDelta.x, DefaultRectHightLevelSize);
+            return result;
         }
 
     }

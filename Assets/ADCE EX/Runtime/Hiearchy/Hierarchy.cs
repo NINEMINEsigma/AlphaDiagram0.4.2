@@ -15,6 +15,7 @@ namespace AD.Experimental.GameEditor
         public HierarchyItem HierarchyItemPrefab;
         public ListView HierarchyListView;
         public BehaviourContext behaviourContext;
+        public GUISkin skin;
     }
 
     public class Hierarchy : ADController
@@ -26,14 +27,16 @@ namespace AD.Experimental.GameEditor
         private void Start()
         {
             GameEditorApp.instance.RegisterController(this);
-
-            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
-            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
         }
 
         public override void Init()
         {
+            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
+            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
+            GUI.skin = EditorAssets.skin;
+            TargetTopObjectEditors = new();
+            ClearAndRefresh();
         }
 
         public ISerializeHierarchyEditor this[int index]
@@ -77,7 +80,9 @@ namespace AD.Experimental.GameEditor
             foreach (var item in TargetTopObjectEditors)
             {
                 item.MatchItem = RegisterHierarchyItem(item);
+                item.MatchItem.SortIndex = item.SerializeIndex;
             }
+            EditorAssets.HierarchyListView.SortChilds();
         }
 
         public void RefreshPanel(PointerEventData axisEventData)
@@ -85,7 +90,14 @@ namespace AD.Experimental.GameEditor
             foreach (var target in TargetTopObjectEditors)
             {
                 target.OnSerialize();
+                target.MatchItem.SortIndex = target.SerializeIndex;
             }
+            EditorAssets.HierarchyListView.SortChilds();
+        }
+
+        private void OnApplicationQuit()
+        {
+            GameEditorApp.instance.SaveRecord();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,10 @@ using UnityEngine.UI;
 
 namespace AD.UI
 {
-    public abstract class ListViewItem: PropertyModule
+    public abstract class ListViewItem : PropertyModule
     {
         public abstract ListViewItem Init();
+        public virtual int SortIndex{ get; set; }
     }
 
     public class ListView : PropertyModule
@@ -24,6 +26,9 @@ namespace AD.UI
         [SerializeField] private TMP_Text _Title;
         [SerializeField] private ListViewItem Prefab;
         [SerializeField] private int index = 0;
+
+        public static Func<GameObject, GameObject, int> StaticSortChildPredicate = null;
+        public Func<GameObject, GameObject, int> SortChildPredicate = null;
 
         public ScrollRect.ScrollRectEvent onValueChanged
         {
@@ -69,6 +74,12 @@ namespace AD.UI
         protected override void LetChildAdd(GameObject child)
         {
             child.transform.SetParent(_List.gameObject.transform, false);
+        }
+
+        public void SortChilds()
+        {
+            if (SortChildPredicate != null) this.gameObject.SortChilds(SortChildPredicate);
+            else if (StaticSortChildPredicate != null) this.gameObject.SortChilds(StaticSortChildPredicate);
         }
 
         public GameObject FindItem(int index)
