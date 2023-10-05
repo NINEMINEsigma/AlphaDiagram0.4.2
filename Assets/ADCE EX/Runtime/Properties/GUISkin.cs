@@ -9,5 +9,6 @@
         public GUIStyle textField;
         public GUIStyle textArea;
         public GUIStyle toggle;
+        public GUIStyle colorField;
     }
 }

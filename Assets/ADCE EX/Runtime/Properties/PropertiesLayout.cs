@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using AD.BASE;
 using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace AD.Experimental.GameEditor
@@ -16,6 +17,7 @@ namespace AD.Experimental.GameEditor
         internal enum GUIContentType
         {
             None,
+            Space,
             Box
         }
 
@@ -27,6 +29,7 @@ namespace AD.Experimental.GameEditor
         public string text;
         internal UnityEngine.GameObject UIObject;
         internal UnityEngine.Sprite UIImage;
+        internal int ExtensionalSpaceLine = 0;
         internal GUIContentType ContentType = GUIContentType.None;
 
         public void InitContent()
@@ -62,6 +65,14 @@ namespace AD.Experimental.GameEditor
             toggle.AddListener(T => from.Set(T));
             toggle.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
             toggle.Bind(from);
+        }
+
+        public void InitColor(BindProperty<Color> from)
+        {
+            var colorM = UIObject.GetComponent<AD.UI.ColorManager>();
+            colorM.ColorProperty = from;
+            colorM.title.text = this.text;
+            ExtensionalSpaceLine = 13;
         }
 
         public static GUIContent Temp(string str)
@@ -113,13 +124,22 @@ namespace AD.Experimental.GameEditor
                 {
                     switch (content.ContentType)
                     {
+                        case GUIContent.GUIContentType.Space:
+                            {
+                                CurrentEditorThat.MatchItem.AddNewLevelLine(content.ExtensionalSpaceLine);
+                            }
+                            break;
                         case GUIContent.GUIContentType.Box:
                             {
+                                if (content.ExtensionalSpaceLine > 0)
+                                    CurrentEditorThat.MatchItem.AddNewLevelLine(content.ExtensionalSpaceLine);
                                 rect.GetOrAddComponent<UnityEngine.UI.Image>().sprite = content.UIImage;
                             }
                             break;
                         default:
                             {
+                                if (content.ExtensionalSpaceLine > 0)
+                                    CurrentEditorThat.MatchItem.AddNewLevelLine(content.ExtensionalSpaceLine);
                                 content.UIObject.transform.SetParent(rect, false);
                                 var contentRect = content.UIObject.transform.As<UnityEngine.RectTransform>();
                                 contentRect.sizeDelta = new UnityEngine.Vector2(rect.sizeDelta.x / (float)LineItemCount, PropertiesItem.DefaultRectHightLevelSize);
@@ -305,13 +325,44 @@ namespace AD.Experimental.GameEditor
             DoGUILine(content);
         }
 
-        public static void Space(float line)
+        public static void Space(int line)
         {
             EndHorizontal();
-            for (int i = 0; i < line; i++)
-            {
-                DoGUILine(GUIContent.Temp(""));
-            }
+            var temp = GUIContent.Temp("");
+            temp.ContentType = GUIContent.GUIContentType.Space;
+            temp.ExtensionalSpaceLine = line;
+            DoGUILine(temp);
+        }
+
+        public static void Color(string text, BindProperty<Color>  property)
+        {
+            DoColor(GUIContent.Temp(text), GUI.skin.colorField, property);
+        }
+        public static void Color(GUIContent content, BindProperty<Color> property)
+        {
+            DoColor(content, GUI.skin.colorField, property);
+        }
+        public static void Color(string text, GUIStyle style, BindProperty<Color> property)
+        {
+            DoColor(GUIContent.Temp(text), style, property);
+        }
+        public static void Color(GUIContent content, GUIStyle style, BindProperty<Color> property)
+        {
+            DoColor(content, style, property);
+        }
+        private static void DoColor(GUIContent content, GUIStyle style, BindProperty<Color> property)
+        {
+            content.UIObject = UnityEngine.GameObject.Instantiate(style.Perfab);
+            content.InitColor(property);
+            EndHorizontal();
+            DoGUILine(content);
+        }
+
+        public static void DoContent(GameObject costom)
+        {
+            var content = GUIContent.Temp("");
+            content.UIObject = costom;
+            DoGUILine(content);
         }
 
         public static void BeginHorizontal()

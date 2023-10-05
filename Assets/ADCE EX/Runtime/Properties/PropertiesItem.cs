@@ -57,19 +57,19 @@ namespace AD.Experimental.GameEditor
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, DefaultHight);
         }
 
-        public void AddRectHightLevel()
+        public void AddRectHightLevel(int level=1)
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
-            this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultRectHightLevelSize);
+            this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultRectHightLevelSize* level);
         }
 
-        public RectTransform AddNewLevelLine()
+        public RectTransform AddNewLevelLine(int line=1)
         {
-            AddRectHightLevel();
+            AddRectHightLevel(line);
             Lines.Add(GameObject.Instantiate(SubLinePerfab.gameObject,SubPage));
             GameObject obj = Lines[^1];
             RectTransform result = obj.GetComponent<RectTransform>();
-            result.sizeDelta = new Vector2(result.sizeDelta.x, DefaultRectHightLevelSize);
+            result.sizeDelta = new Vector2(result.sizeDelta.x, DefaultRectHightLevelSize*line);
             return result;
         }
 

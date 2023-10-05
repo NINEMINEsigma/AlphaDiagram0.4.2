@@ -237,7 +237,7 @@ namespace AD
             }
             catch (System.Exception ex)
             {
-                AddError("ReleaseThisFrameUpdate(keys) keys=" + key.ToString() + " Exception:" + ex.StackTrace);
+                AddError("ReleaseThisFrameUpdate(key) key=" + key.ToString() + "\nException:" + ex.Message + "\nStackTrace:" + ex.StackTrace);
             }
         }
         private static void PressThisFrameUpdate(KeyValuePair<List<ButtonControl>, Dictionary<PressType, ADOrderlyEvent>> key)
@@ -252,7 +252,7 @@ namespace AD
             }
             catch (System.Exception ex)
             {
-                AddError("PressThisFrameUpdate(key) key=" + key.ToString() + " Exception:" + ex.StackTrace);
+                AddError("PressThisFrameUpdate(key) key=" + key.ToString() + "\nException:" + ex.Message + "\nStackTrace:" + ex.StackTrace);
             }
         }
         private static void PressButtonUpdate(KeyValuePair<List<ButtonControl>, Dictionary<PressType, ADOrderlyEvent>> key)
@@ -267,7 +267,7 @@ namespace AD
             }
             catch (System.Exception ex)
             {
-                AddError("PressButtonUpdate(keys) keys=" + key.ToString() + " Exception:" + ex.StackTrace);
+                AddError("PressButtonUpdate(key) key=" + key.ToString() + "\nException:" + ex.Message + "\nStackTrace:" + ex.StackTrace);
             }
         }
 

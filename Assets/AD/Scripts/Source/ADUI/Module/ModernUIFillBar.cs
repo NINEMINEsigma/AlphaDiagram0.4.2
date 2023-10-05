@@ -17,7 +17,7 @@ namespace AD.UI
     {
         // Content
         [Range(0, 1)] public float currentPercent;
-        public float minValue;
+        public float minValue = 0;
         public float maxValue = 100;
 
         public float value => (maxValue - minValue) * currentPercent + minValue;
@@ -27,13 +27,16 @@ namespace AD.UI
         public TextMeshProUGUI textPercent;
         public TextMeshProUGUI textValue;
 
+        public bool IsLockByScript = true;
+
         // Settings  
         public bool IsPercent = true;
         public bool IsInt = false;
 
-        public void Update()
+        public void LateUpdate()
         {
-            loadingBar.fillAmount = Mathf.Clamp(currentPercent, 0, 1);
+            if (IsLockByScript) loadingBar.fillAmount = Mathf.Clamp(currentPercent, 0, 1);
+            else currentPercent = loadingBar.fillAmount;
 
             textPercent.text = currentPercent.ToString("F2") + (IsPercent ? "%" : "");
             textValue.text = GetValue().ToString("F2");
@@ -42,6 +45,27 @@ namespace AD.UI
         public float GetValue()
         {
             return IsInt ? (int)value : value;
+        }
+
+        public void Set(float min, float max)
+        {
+            currentPercent = 0;
+            minValue = min;
+            maxValue = max;
+        }
+
+        public void Set(float percent, float min, float max)
+        {
+            currentPercent = percent;
+            minValue = min;
+            maxValue = max;
+        }
+
+        public void Init()
+        {
+            currentPercent = 0;
+            minValue = 0;
+            maxValue = 1;
         }
     }
 }

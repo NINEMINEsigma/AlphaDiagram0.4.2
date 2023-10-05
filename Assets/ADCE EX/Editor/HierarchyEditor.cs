@@ -66,7 +66,10 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
     public TestSerializePropertiesEditor1(TestObject target)
     {
         MatchTarget = target;
+        _Color.Set(Random.ColorHSV());
     }
+
+    BindProperty<Color> _Color = new();
 
     public void OnSerialize()
     {
@@ -75,6 +78,7 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
         MatchItem.SetTitle("Test 1");
 
         AD.Experimental.GameEditor.PropertiesLayout.Label("This Is One Test Label");
+        AD.Experimental.GameEditor.PropertiesLayout.Color("Color", _Color);
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();
     }

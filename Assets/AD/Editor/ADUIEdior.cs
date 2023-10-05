@@ -775,6 +775,7 @@ public class ProgressBarEditor : ADUIEditor
     SerializedProperty textValue;
     SerializedProperty IsPercent;
     SerializedProperty IsInt;
+    SerializedProperty IsLockByScript;
 
     protected override void OnEnable()
     {
@@ -788,6 +789,7 @@ public class ProgressBarEditor : ADUIEditor
         textValue = serializedObject.FindProperty("textValue");
         IsPercent = serializedObject.FindProperty("IsPercent");
         IsInt = serializedObject.FindProperty("IsInt");
+        IsLockByScript = serializedObject.FindProperty("IsLockByScript");
     }
 
     public override void OnContentGUI()
@@ -801,7 +803,7 @@ public class ProgressBarEditor : ADUIEditor
 
         if (pbTarget.loadingBar != null && pbTarget.textPercent != null && pbTarget.textValue != null)
         {
-            pbTarget.Update();
+            pbTarget.LateUpdate();
         }
         else
         {
@@ -850,11 +852,11 @@ public class ProgressBarEditor : ADUIEditor
     {
         GUILayout.BeginHorizontal(EditorStyles.helpBox);
 
+        IsLockByScript.boolValue = GUILayout.Toggle(IsLockByScript.boolValue, new GUIContent("Is Lcok By Script"), customSkin.FindStyle("Toggle"));
+        IsLockByScript.boolValue = GUILayout.Toggle(IsLockByScript.boolValue, new GUIContent(""), customSkin.FindStyle("Toggle Helper"));
+
         IsPercent.boolValue = GUILayout.Toggle(IsPercent.boolValue, new GUIContent("Is Percent"), customSkin.FindStyle("Toggle"));
         IsPercent.boolValue = GUILayout.Toggle(IsPercent.boolValue, new GUIContent(""), customSkin.FindStyle("Toggle Helper"));
-
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal(EditorStyles.helpBox);
 
         IsInt.boolValue = GUILayout.Toggle(IsInt.boolValue, new GUIContent("Is Int"), customSkin.FindStyle("Toggle"));
         IsInt.boolValue = GUILayout.Toggle(IsInt.boolValue, new GUIContent(""), customSkin.FindStyle("Toggle Helper"));
