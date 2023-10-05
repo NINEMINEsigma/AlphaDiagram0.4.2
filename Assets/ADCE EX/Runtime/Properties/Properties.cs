@@ -4,7 +4,6 @@ using AD.BASE;
 using AD.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static UnityEngine.GraphicsBuffer;
 
 namespace AD.Experimental.GameEditor
 {
@@ -14,7 +13,7 @@ namespace AD.Experimental.GameEditor
         public PropertiesItem PropertiesItemPrefab;
         public ListView PropertiesListView;
         public BehaviourContext behaviourContext;
-        public AD.Experimental.GameEditor.GUISkin CustomSkin;
+        public GUISkin CustomSkin;
     }
 
     public class Properties : ADController
@@ -34,7 +33,7 @@ namespace AD.Experimental.GameEditor
             EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
             EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
-            AD.Experimental.GameEditor.GUI.skin = EditorAssets.CustomSkin;
+            GUI.skin = EditorAssets.CustomSkin;
         }
 
         public ISerializePropertiesEditor this[int index]
@@ -59,12 +58,13 @@ namespace AD.Experimental.GameEditor
             }
         }
 
-        private PropertiesItem RegisterHierarchyItem(ISerializePropertiesEditor target)
+        private PropertiesItem RegisterPropertiesItem(ISerializePropertiesEditor target)
         {
             PropertiesItem propertiesItem = EditorAssets.PropertiesListView.GenerateItem() as PropertiesItem;
             target.MatchItem = propertiesItem;
             propertiesItem.MatchEditor = target;
             target.OnSerialize();
+            propertiesItem.name = propertiesItem.SortIndex.ToString();
             return propertiesItem;
         }
 
@@ -75,7 +75,7 @@ namespace AD.Experimental.GameEditor
             {
                 foreach (var target in CurrentPropertiesEditors)
                 {
-                    RegisterHierarchyItem(target).SortIndex = target.SerializeIndex;
+                    RegisterPropertiesItem(target);
                     target.OnSerialize();
 
                 }
@@ -90,7 +90,6 @@ namespace AD.Experimental.GameEditor
                 foreach (var target in CurrentPropertiesEditors)
                 {
                     target.OnSerialize();
-                    target.MatchItem.SortIndex = target.SerializeIndex;
                 }
                 EditorAssets.PropertiesListView.SortChilds();
             }

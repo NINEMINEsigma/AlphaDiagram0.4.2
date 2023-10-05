@@ -65,6 +65,7 @@ MonoBehaviour:
   ElementArea: PropertyModule
   ListToggle: {fileID: 6499805005127591572}
   ListSubListView: {fileID: 3630721908526534234}
+  ExtensionOpenSingleItemSum: 0
 --- !u!114 &6465591658105940719
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -12,9 +12,11 @@ namespace AD.Experimental.GameEditor
         public const int MaxOpenSingleItemSum = 10;
         [SerializeField] private AD.UI.Toggle ListToggle;
         public AD.UI.ListView ListSubListView;
-        public int ExtensionOpenSingleItemSum = -1;
+        public int ExtensionOpenSingleItemSum = 0;
 
         public ISerializeHierarchyEditor MatchEditor;
+
+        public override int SortIndex { get => MatchEditor.SerializeIndex; set { } }
 
         public override ListViewItem Init()
         {
@@ -45,15 +47,15 @@ namespace AD.Experimental.GameEditor
 
         private void OnRightClick()
         {
-            if (!ListToggle.Selected) return;
-            MatchEditor?.MatchTarget.ClickOnLeft();
+            if (!ListToggle.Selected) return; 
+            MatchEditor?.MatchTarget.ClickOnRight();
         }
 
         public void Refresh(bool boolen)
         {
             MatchEditor.IsOpenListView = boolen;
             if (boolen == true) OpenListView(); else CloseListView();
-            MatchEditor?.MatchTarget.ClickOnRight();
+            MatchEditor?.MatchTarget.ClickOnLeft();
             GameEditorApp.instance.CurrentHierarchyItem = this;
             GameEditorApp.instance.SendImmediatelyCommand<CurrentItemSelectOnHierarchyPanel>();
         }
@@ -62,6 +64,7 @@ namespace AD.Experimental.GameEditor
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultHight * t);
+            MatchEditor.MatchTarget.ParentTarget?.MatchHierarchyEditor.MatchItem.AddRectHightLevel(t);
         }
 
         public void ClearRectHightLevel()
@@ -72,24 +75,14 @@ namespace AD.Experimental.GameEditor
 
         private void OpenListView()
         {
-            if (MatchEditor == null)
-            {
-#if UNITY_EDITOR
-                Debug.LogWarning("MatchEditor is null");
-                return;
-#else
-                throw new ADException("MatchEditor is null");
-#endif
-            }
-            var ChildItems = MatchEditor.MatchTarget.GetChilds();
-            if (ChildItems == null) return;
+            List<ICanSerializeOnCustomEditor> ChildItems = MatchEditor.MatchTarget.GetChilds();
             int ChildsSum = MatchEditor.MatchTarget.GetChilds().Count;
 
-            MatchEditor.MatchTarget.ParentTarget?.MatchHierarchyEditor.MatchItem.AddRectHightLevel(
-                ChildsSum < (MaxOpenSingleItemSum + ExtensionOpenSingleItemSum)
-                ? ChildsSum : (MaxOpenSingleItemSum + ExtensionOpenSingleItemSum));
             ListSubListView.gameObject.SetActive(true);
-            SetUpSubListView();
+            int OpenSingleItemSum = MaxOpenSingleItemSum + ExtensionOpenSingleItemSum;
+            int t = Mathf.Clamp(ChildsSum, 1, OpenSingleItemSum);
+            this.AddRectHightLevel(t);
+            SetUpSubListView(ChildItems);
         }
 
         private void CloseListView()
@@ -99,13 +92,24 @@ namespace AD.Experimental.GameEditor
             ClearSubListView();
         }
 
-        private void SetUpSubListView()
+        private void SetUpSubListView(List<ICanSerializeOnCustomEditor> childs)
         {
-            foreach (var item in MatchEditor.MatchTarget.GetChilds())
+            ListSubListView.Clear();
+            foreach (var item in childs)
             {
-                var current = ListSubListView.GenerateItem() as HierarchyItem;
-                current.MatchEditor = item.MatchHierarchyEditor;
+                item.MatchHierarchyEditor.MatchItem = RegisterHierarchyItem(item.MatchHierarchyEditor);
             }
+            ListSubListView.SortChilds();
+        }
+
+        private HierarchyItem RegisterHierarchyItem(ISerializeHierarchyEditor target)
+        {
+            HierarchyItem hierarchyItem = ListSubListView.GenerateItem() as HierarchyItem;
+            target.MatchItem = hierarchyItem;
+            hierarchyItem.MatchEditor = target;
+            target.OnSerialize();
+            hierarchyItem.name = hierarchyItem.SortIndex.ToString();
+            return hierarchyItem;
         }
 
         private void ClearSubListView()

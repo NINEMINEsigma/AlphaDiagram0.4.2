@@ -9,7 +9,7 @@ namespace AD.Experimental.GameEditor
     public class PropertiesItem : ListViewItem
     {
         public const float DefaultHight = 30;
-        public const float DefaultRectHightLevelSize = 20;
+        public const float DefaultRectHightLevelSize = 30;
 
         [SerializeField] AD.UI.Toggle Lock_Tilie_Toggle;
         [SerializeField] RectTransform SubPage;
@@ -21,10 +21,11 @@ namespace AD.Experimental.GameEditor
 
         [SerializeField] private List<GameObject> Lines = new();
 
+        public override int SortIndex { get => MatchEditor.SerializeIndex; set { } }
+
         public override ListViewItem Init()
         {
             InitToggle();
-            IsLock = false;
             ClearRectHightLevel();
             foreach (var obj in Lines)
             {
@@ -40,7 +41,6 @@ namespace AD.Experimental.GameEditor
 
         private void InitToggle()
         {
-            Lock_Tilie_Toggle.Init();
             Lock_Tilie_Toggle.RemoveListener(SwitchLock);
             Lock_Tilie_Toggle.AddListener(SwitchLock);
             Lock_Tilie_Toggle.SetTitle("[ P R O P E R T Y ]");

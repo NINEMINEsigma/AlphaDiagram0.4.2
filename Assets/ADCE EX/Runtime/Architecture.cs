@@ -21,12 +21,7 @@ namespace AD.Experimental.GameEditor
 
         public override void Init()
         {
-            ListView.StaticSortChildPredicate = ItemSorting;
-        }
 
-        private int ItemSorting(GameObject _Left,GameObject _Right)
-        {
-            return _Left.GetComponent<ListViewItem>().SortIndex.CompareTo(_Right.GetComponent<ListViewItem>().SortIndex);
         }
 
         public HierarchyItem CurrentHierarchyItem;
@@ -56,13 +51,11 @@ namespace AD.Experimental.GameEditor
         {
             if (self.IsOpenListView)
             {
-                var temp = self.MatchTarget.GetChilds();
-                self.MatchItem.ListSubListView.Clear();
-                if (temp != null)
-                    foreach (var item in temp)
-                    {
-                        self.RegisterHierarchyItem(item.MatchHierarchyEditor);
-                    }
+                foreach (var item in self.MatchTarget.GetChilds())
+                {
+                    item.MatchHierarchyEditor.BaseHierarchyItemSerialize();
+                    item.MatchHierarchyEditor.OnSerialize();
+                }
             }
         }
 
@@ -93,7 +86,7 @@ namespace AD.Experimental.GameEditor
     public interface ICanSerialize
     {
         void OnSerialize();
-        int SerializeIndex { get; }
+        int SerializeIndex { get; set; }
     }
 
     public interface ISerializeHierarchyEditor: ICanSerialize

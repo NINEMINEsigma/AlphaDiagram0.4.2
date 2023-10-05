@@ -46,11 +46,12 @@ public class TestSerializeHierarchyEditor : ISerializeHierarchyEditor
 
     public bool IsOpenListView { get ; set ; }
 
-    public int SerializeIndex => MatchTarget.SerializeIndex;
+    public int SerializeIndex { get => MatchTarget.SerializeIndex; set => throw new ADException(); }
 
     public void OnSerialize()
     {
-        MatchItem.SetTitle(MatchTarget.As<TestObject>().SerializeIndex.ToString());
+        MatchItem.SetTitle(MatchTarget.SerializeIndex.ToString());
+        this.BaseHierarchyItemSerialize();
     }
 }
 
@@ -60,7 +61,7 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
 
     public ICanSerializeOnCustomEditor MatchTarget { get; private set; }
 
-    public int SerializeIndex => 0;
+    public int SerializeIndex { get => 0; set => throw new ADException(); }
 
     public TestSerializePropertiesEditor1(TestObject target)
     {
@@ -85,7 +86,8 @@ public class TestSerializePropertiesEditor2 : ISerializePropertiesEditor
 
     public ICanSerializeOnCustomEditor MatchTarget { get; private set; }
 
-    public int SerializeIndex => 200;
+    public int SerializeIndex { get => 200; set => throw new ADException(); }
+    BindProperty<string> Property { get; set; } = new();
 
     public TestSerializePropertiesEditor2(TestObject target)
     {
@@ -98,7 +100,13 @@ public class TestSerializePropertiesEditor2 : ISerializePropertiesEditor
 
         MatchItem.SetTitle("Test 2");
 
-        AD.Experimental.GameEditor.PropertiesLayout.Label("This Is Index : " + MatchTarget.As<TestObject>().SerializeIndex.ToString());
+        AD.Experimental.GameEditor.PropertiesLayout.BeginHorizontal();
+
+        AD.Experimental.GameEditor.PropertiesLayout.Label("This Is Index : ");
+        Property.Set(MatchTarget.SerializeIndex.ToString());
+        AD.Experimental.GameEditor.PropertiesLayout.TextField("Index", Property);
+
+        AD.Experimental.GameEditor.PropertiesLayout.EndHorizontal();
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();
     }
@@ -131,7 +139,7 @@ public class HierarchyEditor : AbstractCustomADEditor
         EditorGUILayout.PropertyField(EditorAssets);
     }
 
-    List<TestObject> TestObjects = new();
+    readonly List<TestObject> TestObjects = new();
 
     public override void OnSettingsGUI()
     {

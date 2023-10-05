@@ -15,7 +15,6 @@ namespace AD.Experimental.GameEditor
         public HierarchyItem HierarchyItemPrefab;
         public ListView HierarchyListView;
         public BehaviourContext behaviourContext;
-        public GUISkin skin;
     }
 
     public class Hierarchy : ADController
@@ -34,7 +33,6 @@ namespace AD.Experimental.GameEditor
             EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
             EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
-            GUI.skin = EditorAssets.skin;
             TargetTopObjectEditors = new();
             ClearAndRefresh();
         }
@@ -70,7 +68,9 @@ namespace AD.Experimental.GameEditor
             HierarchyItem hierarchyItem = EditorAssets.HierarchyListView.GenerateItem() as HierarchyItem;
             target.MatchItem = hierarchyItem;
             hierarchyItem.MatchEditor = target;
+            target.BaseHierarchyItemSerialize();
             target.OnSerialize();
+            hierarchyItem.name = hierarchyItem.SortIndex.ToString();
             return hierarchyItem;
         }
 
@@ -80,7 +80,6 @@ namespace AD.Experimental.GameEditor
             foreach (var item in TargetTopObjectEditors)
             {
                 item.MatchItem = RegisterHierarchyItem(item);
-                item.MatchItem.SortIndex = item.SerializeIndex;
             }
             EditorAssets.HierarchyListView.SortChilds();
         }
@@ -89,8 +88,8 @@ namespace AD.Experimental.GameEditor
         {
             foreach (var target in TargetTopObjectEditors)
             {
+                target.BaseHierarchyItemSerialize();
                 target.OnSerialize();
-                target.MatchItem.SortIndex = target.SerializeIndex;
             }
             EditorAssets.HierarchyListView.SortChilds();
         }

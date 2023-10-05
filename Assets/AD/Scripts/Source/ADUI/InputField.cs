@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 namespace AD.UI
 {
     [Serializable, RequireComponent(typeof(TMP_InputField))]
-    public class InputField : AD.UI.ADUI, IPointerEnterHandler, IPointerExitHandler
+    public class InputField : AD.UI.ADUI
     {
         public override bool IsNeedContext => false;
 
@@ -122,6 +122,7 @@ namespace AD.UI
                 property.AddListenerOnSet(WhenBindSet);
             }
             _m_Property = property;
+            source.text = _m_Property.Get();
         }
 
         private void WhenBindSet(string text)

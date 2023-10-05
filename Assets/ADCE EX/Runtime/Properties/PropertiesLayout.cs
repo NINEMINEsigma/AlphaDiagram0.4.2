@@ -44,6 +44,7 @@ namespace AD.Experimental.GameEditor
             var button = UIObject.GetComponent<AD.UI.Button>();
             button.SetTitle(text);
             button.AddListener(call);
+            button.AddListener(() => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
         }
 
         public void InitTextField(BindProperty<string> from)
@@ -51,14 +52,16 @@ namespace AD.Experimental.GameEditor
             var inputField = UIObject.GetComponent<AD.UI.InputField>();
             inputField.Bind(from);
             inputField.SetPlaceholderText(text);
+            inputField.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
         }
 
         public void InitToggle(BindProperty<bool> from)
         {
-            var inputField = UIObject.GetComponent<AD.UI.Toggle>();
-            inputField.SetTitle(text);
-            inputField.AddListener(T => from.Set(T));
-            from.AddListenerOnSet(T => from.Set(T));
+            var toggle = UIObject.GetComponent<AD.UI.Toggle>();
+            toggle.SetTitle(text);
+            toggle.AddListener(T => from.Set(T));
+            toggle.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
+            toggle.Bind(from);
         }
 
         public static GUIContent Temp(string str)
@@ -80,16 +83,10 @@ namespace AD.Experimental.GameEditor
         private static ISerializePropertiesEditor CurrentEditorThat;
 
         private static List<List<GUIContent>> GUILayoutLineList = new();
-        private static bool IsNeedMulLine = true, IsJustSetUpNotNeedMulLine = false;
+        private static bool IsNeedMulLine = true;
         private static void DoGUILine(GUIContent content)
         {
-            if (IsJustSetUpNotNeedMulLine && !IsNeedMulLine)
-            {
-                IsJustSetUpNotNeedMulLine = false;
-                IsNeedMulLine = false;
-                GUILayoutLineList.Add(new());
-            }
-            else if (!IsNeedMulLine)
+            if (!IsNeedMulLine)
             {
                 GUILayoutLineList[^1].Add(content);
             }
@@ -211,6 +208,18 @@ namespace AD.Experimental.GameEditor
             DoGUILine(content);
         }
 
+        public static void TextArea(string text)
+        {
+            var bindProperty = new BindProperty<string>();
+            bindProperty.Set(text);
+            DoTextField(GUIContent.Temp(""), bindProperty, GUI.skin.textField);
+        }
+        public static void TextArea(string text, GUIStyle style)
+        {
+            var bindProperty = new BindProperty<string>();
+            bindProperty.Set(text);
+            DoTextField(GUIContent.Temp(""), bindProperty, style);
+        }
         public static void TextArea(BindProperty<string> bindProperty)
         {
             DoTextField(GUIContent.Temp(""), bindProperty, GUI.skin.textField);
@@ -307,11 +316,12 @@ namespace AD.Experimental.GameEditor
 
         public static void BeginHorizontal()
         {
-            IsJustSetUpNotNeedMulLine = true;
+            IsNeedMulLine = false;
+            if (GUILayoutLineList.Count == 0 || GUILayoutLineList[^1].Count > 0)
+                GUILayoutLineList.Add(new());
         }
         public static void EndHorizontal()
         {
-            IsJustSetUpNotNeedMulLine = false;
             IsNeedMulLine = true;
         }
     }

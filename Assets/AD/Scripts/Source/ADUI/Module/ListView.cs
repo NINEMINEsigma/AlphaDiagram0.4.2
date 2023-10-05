@@ -9,9 +9,15 @@ using UnityEngine.UI;
 
 namespace AD.UI
 {
-    public abstract class ListViewItem : PropertyModule
+    public abstract class ListViewItem : PropertyModule,IComparable<ListViewItem>
     {
         public abstract ListViewItem Init();
+
+        public virtual int CompareTo(ListViewItem other)
+        {
+            return this.SortIndex.CompareTo(other.SortIndex);
+        }
+
         public virtual int SortIndex{ get; set; }
     }
 
@@ -27,9 +33,9 @@ namespace AD.UI
         [SerializeField] private ListViewItem Prefab;
         [SerializeField] private int index = 0;
 
-        public static Func<GameObject, GameObject, int> StaticSortChildPredicate = null;
-        public Func<GameObject, GameObject, int> SortChildPredicate = null;
-
+        public static Comparison<Transform> StaticSortChildComparison = null;
+        public Comparison<Transform> SortChildComparison = null;
+        
         public ScrollRect.ScrollRectEvent onValueChanged
         {
             get => _Scroll.onValueChanged;
@@ -63,6 +69,7 @@ namespace AD.UI
             if (Prefab == null) return null;
             GameObject item  = Spawn(ListViewDefaultPerfabSpawnKey, Prefab.gameObject);
             this[index++] = item;
+            item.GetComponent<ListViewItem>().SortIndex = index++;
             return item.GetComponent<ListViewItem>().Init();
         }
 
@@ -78,8 +85,10 @@ namespace AD.UI
 
         public void SortChilds()
         {
-            if (SortChildPredicate != null) this.gameObject.SortChilds(SortChildPredicate);
-            else if (StaticSortChildPredicate != null) this.gameObject.SortChilds(StaticSortChildPredicate);
+            if (Childs.Count < 2) return;
+            if (SortChildComparison != null) _List.gameObject.SortChilds(SortChildComparison);
+            else if (StaticSortChildComparison != null) _List.gameObject.SortChilds(StaticSortChildComparison);
+            else _List.gameObject.SortChildComponentTransform<ListViewItem>();
         }
 
         public GameObject FindItem(int index)
@@ -97,6 +106,5 @@ namespace AD.UI
                 Remove(index);
             }
         }
-
     }
 }

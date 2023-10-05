@@ -46,17 +46,23 @@ namespace AD.UI
         public UnityEngine.UI.Image mark;
         public TMP_Text title;
 
-        private bool _IsCheck = false;
+        private BindProperty<bool> _IsCheck = new();
         public bool IsCheck
         {
-            get { return _IsCheck; }
+            get { return _IsCheck.Get(); }
             private set
             {
-                _IsCheck = value;
+                _IsCheck.Set(value);
                 tab.gameObject.SetActive(!value);
                 mark.gameObject.SetActive(value);
                 actions.Invoke(value);
             }
+        }
+
+        public void Bind(BindProperty<bool> property)
+        {
+            _IsCheck = property;
+            IsCheck = _IsCheck.Get();
         }
 
         private RegisterInfo __unregisterInfo;
@@ -87,7 +93,7 @@ namespace AD.UI
 
         public void Init()
         {
-            _IsCheck = false;
+            _IsCheck.Set(false);
             tab.gameObject.SetActive(true);
             mark.gameObject.SetActive(false);
         }
