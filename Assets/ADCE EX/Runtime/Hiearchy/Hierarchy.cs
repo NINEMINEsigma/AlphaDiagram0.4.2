@@ -23,6 +23,22 @@ namespace AD.Experimental.GameEditor
 
         public List<ISerializeHierarchyEditor> TargetTopObjectEditors { get; private set; } = new();
 
+        public void AddOnTop(ISerializeHierarchyEditor editor)
+        {
+            TargetTopObjectEditors.Add(editor);
+            RefreshPanel();
+            Architecture.GetController<Properties>().ClearAndRefresh();
+        }
+
+        public void RemoveOnTop(ISerializeHierarchyEditor editor)
+        {
+            if (TargetTopObjectEditors.Remove(editor))
+            {
+                RefreshPanel();
+                Architecture.GetController<Properties>().ClearAndRefresh();
+            }
+        }
+
         private void Start()
         {
             GameEditorApp.instance.RegisterController(this);
@@ -30,8 +46,8 @@ namespace AD.Experimental.GameEditor
 
         public override void Init()
         {
-            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
-            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
+            //EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
+            //EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
             TargetTopObjectEditors = new();
             ClearAndRefresh();
@@ -77,6 +93,8 @@ namespace AD.Experimental.GameEditor
         public void ClearAndRefresh()
         {
             EditorAssets.HierarchyListView.Clear();
+            GameEditorApp.instance.CurrentHierarchyItem = null;
+            GameEditorApp.instance.SendImmediatelyCommand<CurrentItemSelectOnHierarchyPanel>();
             foreach (var item in TargetTopObjectEditors)
             {
                 item.MatchItem = RegisterHierarchyItem(item);
@@ -84,7 +102,7 @@ namespace AD.Experimental.GameEditor
             EditorAssets.HierarchyListView.SortChilds();
         }
 
-        public void RefreshPanel(PointerEventData axisEventData)
+        public void RefreshPanel(PointerEventData axisEventData=null)
         {
             foreach (var target in TargetTopObjectEditors)
             {

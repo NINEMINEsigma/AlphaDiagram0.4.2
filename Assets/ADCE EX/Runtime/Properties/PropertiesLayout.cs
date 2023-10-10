@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using AD.BASE;
+using AD.Utility;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
@@ -26,7 +27,8 @@ namespace AD.Experimental.GameEditor
             this.text = text;
         }
 
-        public string text;
+        private string _text;
+        public string text { get => _text.Translate(); set => _text = value; }
         internal UnityEngine.GameObject UIObject;
         internal UnityEngine.Sprite UIImage;
         internal int ExtensionalSpaceLine = 0;
@@ -358,7 +360,11 @@ namespace AD.Experimental.GameEditor
             DoGUILine(content);
         }
 
-        public static void DoContent(GameObject costom)
+        public static void Content(GameObject costom)
+        {
+            DoContent(costom);
+        }
+        private static void DoContent(GameObject costom)
         {
             var content = GUIContent.Temp("");
             content.UIObject = costom;

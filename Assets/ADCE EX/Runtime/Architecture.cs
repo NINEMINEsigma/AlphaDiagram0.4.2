@@ -28,6 +28,11 @@ namespace AD.Experimental.GameEditor
 
     }
 
+    public class GameEditorWindowGenerator : CustomWindowGenerator<GameEditorWindowGenerator>
+    {
+
+    }
+
     public static class CustomEditorUtility
     {
         public static HierarchyItem RegisterHierarchyItem(this ISerializeHierarchyEditor self,ISerializeHierarchyEditor target)
@@ -43,7 +48,7 @@ namespace AD.Experimental.GameEditor
         {
             self.ParentTarget?.GetChilds().Remove(self);
             self.ParentTarget = _Right;
-            _Right.GetChilds().Add(self);
+            _Right?.GetChilds().Add(self);
         }
 
         //需要在自定义的ISerializeHierarchyEditor.OnSerialize的最前面使用

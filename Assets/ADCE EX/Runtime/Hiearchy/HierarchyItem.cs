@@ -9,7 +9,7 @@ namespace AD.Experimental.GameEditor
     public class HierarchyItem : ListViewItem
     {
         public const float DefaultHight = 20;
-        public const int MaxOpenSingleItemSum = 10;
+        public static int MaxOpenSingleItemSum = 10;
         [SerializeField] private AD.UI.Toggle ListToggle;
         public AD.UI.ListView ListSubListView;
         public int ExtensionOpenSingleItemSum = 0;
@@ -35,8 +35,8 @@ namespace AD.Experimental.GameEditor
         private void InitToggle()
         {
             ListToggle.Init();
-            ListToggle.RemoveListener(Refresh);
-            ListToggle.AddListener(Refresh);
+            ListToggle.RemoveListener(OnClickAndRefresh);
+            ListToggle.AddListener(OnClickAndRefresh);
             ListToggle.SetTitle("[ N U L L ]");
         }
 
@@ -51,7 +51,7 @@ namespace AD.Experimental.GameEditor
             MatchEditor?.MatchTarget.ClickOnRight();
         }
 
-        public void Refresh(bool boolen)
+        public void OnClickAndRefresh(bool boolen)
         {
             MatchEditor.IsOpenListView = boolen;
             if (boolen == true) OpenListView(); else CloseListView();
@@ -60,10 +60,12 @@ namespace AD.Experimental.GameEditor
             GameEditorApp.instance.SendImmediatelyCommand<CurrentItemSelectOnHierarchyPanel>();
         }
 
+        private int AddtionalLevel = 0;
         public void AddRectHightLevel(int t)
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultHight * t);
+            AddtionalLevel += t;
             MatchEditor.MatchTarget.ParentTarget?.MatchHierarchyEditor.MatchItem.AddRectHightLevel(t);
         }
 
@@ -71,6 +73,8 @@ namespace AD.Experimental.GameEditor
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, DefaultHight);
+            MatchEditor.MatchTarget.ParentTarget?.MatchHierarchyEditor.MatchItem.AddRectHightLevel(-AddtionalLevel);
+            AddtionalLevel = 0;
         }
 
         private void OpenListView()
@@ -88,7 +92,6 @@ namespace AD.Experimental.GameEditor
         private void CloseListView()
         {
             ClearRectHightLevel();
-            ListSubListView.gameObject.SetActive(false);
             ClearSubListView();
         }
 
@@ -118,5 +121,10 @@ namespace AD.Experimental.GameEditor
             ListSubListView.Clear();
         }
 
+        public void Refresh()
+        {
+            CloseListView();
+            OpenListView();
+        }
     }
 }

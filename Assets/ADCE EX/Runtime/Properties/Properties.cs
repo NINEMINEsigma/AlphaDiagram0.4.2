@@ -30,8 +30,8 @@ namespace AD.Experimental.GameEditor
 
         public override void Init()
         {
-            EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
-            EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
+            //EditorAssets.behaviourContext.OnPointerEnterEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerEnterEvent, RefreshPanel);
+            //EditorAssets.behaviourContext.OnPointerExitEvent = ADUI.InitializeContextSingleEvent(EditorAssets.behaviourContext.OnPointerExitEvent, RefreshPanel);
 
             GUI.skin = EditorAssets.CustomSkin;
         }
@@ -83,7 +83,7 @@ namespace AD.Experimental.GameEditor
             }
         }
 
-        public void RefreshPanel(PointerEventData axisEventData)
+        public void RefreshPanel(PointerEventData axisEventData = null)
         {
             if (MatchTarget != null)
             {

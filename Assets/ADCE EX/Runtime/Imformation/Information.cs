@@ -160,7 +160,7 @@ namespace AD.Experimental.GameEditor
         }
     }
 
-    public class Infomation : ADController
+    public class Information : ADController
     {
         [SerializeField] AD.UI.Text LeftText;
         [SerializeField] AD.UI.Text RightText;
@@ -169,6 +169,8 @@ namespace AD.Experimental.GameEditor
         [SerializeField] AD.UI.ListView TaskPanelListView;
         [SerializeField] AD.UI.ModernUIFillBar TaskPanelPercentBar;
         [SerializeField] TaskViewItem TaskViewItemPerfab;
+        [SerializeField] SinglePanel SinglePanelPerfab;
+        [SerializeField] GameObject SinglePanelLinePerfab;
 
         private void Start()
         {
@@ -185,6 +187,11 @@ namespace AD.Experimental.GameEditor
             _m_TaskList.CompleteTaskCallBack.AddListener(T => Refresh());
             _m_TaskList.CompleteTaskCallBack.AddListener(CompleteTask);
             TaskPanelListView.SetPrefab(TaskViewItemPerfab);
+
+            Architecture.RegisterSystem<SinglePanelGenerator>();
+            Architecture.GetSystem<SinglePanelGenerator>().Parent = transform.parent as RectTransform;
+            Architecture.GetSystem<SinglePanelGenerator>().WindowPerfab = SinglePanelPerfab;
+            Architecture.GetSystem<SinglePanelGenerator>().SinglePanelLinePerfab = SinglePanelLinePerfab;
         }
 
         bool IsOpenTaskPanel = false;

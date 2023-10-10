@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
 using AD.UI;
+using AD.Utility;
 using UnityEngine;
 
 namespace AD.Experimental.GameEditor
@@ -36,7 +37,7 @@ namespace AD.Experimental.GameEditor
 
         public void SetTitle(string title)
         {
-            Lock_Tilie_Toggle.SetTitle(title);
+            Lock_Tilie_Toggle.SetTitle(title.Translate());
         }
 
         private void InitToggle()
