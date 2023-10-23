@@ -7,7 +7,6 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace AD.BASE
 {
@@ -270,6 +269,11 @@ namespace AD.BASE
         void Execute(params object[] args);
     }
 
+    public interface ICanMonitorCommand<_Command>where _Command:IADCommand
+    {
+        void OnCommandCall();
+    }
+
     public interface IADArchitecture
     {
         static IADArchitecture instence { get; }
@@ -295,6 +299,8 @@ namespace AD.BASE
         bool Contains<_Type>();
         public IADArchitecture SendImmediatelyCommand<_Command>() where _Command : class, IADCommand, new();
         public IADArchitecture SendImmediatelyCommand<_Command>(_Command command) where _Command : class, IADCommand, new();
+
+        void Diffusing<_Command>() where _Command : IADCommand;
     }
 
     public interface IADModel : ICanInitialize, ICanGetArchitecture
@@ -913,6 +919,21 @@ namespace AD.BASE
             command.Execute();
             return instance;
         }
+        #endregion
+
+        #region sFunction
+
+        public void Diffusing<_Command>()where _Command: IADCommand
+        {
+            foreach (var item in AD__Objects)
+            {
+                if(item.Is(out ICanMonitorCommand<_Command> monitor))
+                {
+                    monitor.OnCommandCall();
+                }
+            }
+        }
+
         #endregion
     }
 

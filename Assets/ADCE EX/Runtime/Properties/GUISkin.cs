@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UI;
 
 namespace AD.Experimental.GameEditor
 {
@@ -16,6 +17,7 @@ namespace AD.Experimental.GameEditor
         public GUIStyle MulVector2Field;
         public GUIStyle MulVector3Field;
         public GUIStyle MulVector4Field;
+        public GUIStyle DropDown;
         public List<GUIStyle> CustomStyles = new();
 
         public GUIStyle FindStyle(string name)
@@ -61,6 +63,10 @@ namespace AD.Experimental.GameEditor
                 case "MulVector4Field":
                     {
                         return MulVector4Field;
+                    }
+                case "DropDown":
+                    {
+                        return DropDown;
                     }
                 default:
                     var result = CustomStyles.FirstOrDefault(T => T.Perfab.name.Equals(name));

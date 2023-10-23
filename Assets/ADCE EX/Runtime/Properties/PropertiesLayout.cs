@@ -139,9 +139,14 @@ namespace AD.Experimental.GameEditor
             });
         }
 
-        public void InitEnum<_Enum>()
+        public void InitDropDown(string[] operation,UnityAction<int> call)
         {
-            var enumL = UIObject.GetComponent<DropDown>();
+
+        }
+
+        public void InitEnum<_Enum>(UnityAction<_Enum> call)
+        {
+
         }
 
         public void Init_Action(UnityAction<GameObject,string> init)
@@ -640,25 +645,25 @@ namespace AD.Experimental.GameEditor
             content.UIObject = UnityEngine.GameObject.Instantiate(style.Perfab);
             content.InitEnum<_Enum>(call);
             EndHorizontal();
-            BeginHorizontal()
+            BeginHorizontal();
             Label(content._text);
             DoGUILine(content);
             EndHorizontal();
         }
 
-        public static void DropDown(GUIContent content, GUIStyle style,UnityAction<int> call,TOParam string[] operation)
+        public static void DropDown(GUIContent content, GUIStyle style,UnityAction<int> call,params string[] operation)
         {
             DoDropDown(content,style,call,operation);
         }
-        public static void DropDown(GUIContent content,UnityAction<int> call,TOParam string[] operation)
+        public static void DropDown(GUIContent content,UnityAction<int> call, params string[] operation)
         {
             DoDropDown(content,GUI.skin.DropDown,call,operation);
         }
-        public static void DropDown(string text, GUIStyle style,UnityAction<int> call,TOParam string[] operation)
+        public static void DropDown(string text, GUIStyle style,UnityAction<int> call, params string[] operation)
         {
             DoDropDown(GUIContent.Temp(text),style,call,operation);
         }
-        public static void DropDown(string text,UnityAction<int> call,TOParam string[] operation)
+        public static void DropDown(string text,UnityAction<int> call, params string[] operation)
         {
             DoDropDown(GUIContent.Temp(text),GUI.skin.DropDown,call,operation);
         }
@@ -667,7 +672,7 @@ namespace AD.Experimental.GameEditor
             content.UIObject = UnityEngine.GameObject.Instantiate(style.Perfab);
             content.InitDropDown(operation,call);
             EndHorizontal();
-            BeginHorizontal()
+            BeginHorizontal();
             Label(content._text);
             DoGUILine(content);
             EndHorizontal();

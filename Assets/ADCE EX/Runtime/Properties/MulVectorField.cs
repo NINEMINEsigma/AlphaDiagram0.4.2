@@ -50,11 +50,11 @@ namespace AD.Experimental.GameEditor
 
         public void Init()
         {
-            CallBack.Clear();
+            CallBack.RemoveAllListeners();
             foreach (var field in SingleFields)
             {
-                field.onEndEdit.RemoveAllListeners();
-                field.onEndEdit.AddListener(T => RefreshThenCallBack());
+                field.source.onEndEdit.RemoveAllListeners();
+                field.source.onEndEdit.AddListener(T => RefreshThenCallBack());
             }
         }
 
