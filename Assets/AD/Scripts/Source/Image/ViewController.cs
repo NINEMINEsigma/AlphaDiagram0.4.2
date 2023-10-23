@@ -257,16 +257,6 @@ namespace AD.UI
             Architecture.SendCommand<T>();
         }
 
-        public void SendEvent<T>() where T : class, IADEvent, new()
-        {
-            Architecture.SendEvent<T>();
-        }
-
-        public T GetEvent<T>() where T : class, IADEvent, new()
-        {
-            return Architecture.GetEvent<T>();
-        }
-
         public T GetSystem<T>() where T : class, IADSystem, new()
         {
             return Architecture.GetSystem<T>();

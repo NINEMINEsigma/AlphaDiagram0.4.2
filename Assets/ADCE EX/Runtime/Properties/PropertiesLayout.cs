@@ -46,7 +46,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitButton(UnityAction call)
         {
-            var button = UIObject.GetComponent<AD.UI.Button>();
+            if(!UIObject.TryGetComponent(out AD.UI.Button button))
+            {
+                button = UIObject.GetComponentsInChildren<AD.UI.Button>()[0];
+            }
             button.SetTitle(text.Translate());
             button.AddListener(call);
             button.AddListener(() => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
@@ -54,7 +57,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitTextField(BindProperty<string> from)
         {
-            var inputField = UIObject.GetComponent<AD.UI.InputField>();
+            if (!UIObject.TryGetComponent(out AD.UI.InputField inputField))
+            {
+                inputField = UIObject.GetComponentsInChildren<AD.UI.InputField>()[0];
+            }
             inputField.Bind(from);
             inputField.SetPlaceholderText(text.Translate());
             inputField.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
@@ -62,7 +68,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitToggle(BindProperty<bool> from)
         {
-            var toggle = UIObject.GetComponent<AD.UI.Toggle>();
+            if (!UIObject.TryGetComponent(out AD.UI.Toggle toggle))
+            {
+                toggle = UIObject.GetComponentsInChildren<AD.UI.Toggle>()[0];
+            }
             toggle.SetTitle(text.Translate());
             //toggle.AddListener(T => from.Set(T));
             toggle.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
@@ -71,7 +80,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitToggle(UnityAction<bool> callback)
         {
-            var toggle = UIObject.GetComponent<AD.UI.Toggle>();
+            if (!UIObject.TryGetComponent(out AD.UI.Toggle toggle))
+            {
+                toggle = UIObject.GetComponentsInChildren<AD.UI.Toggle>()[0];
+            }
             toggle.SetTitle(text.Translate());
             toggle.AddListener(callback);
             toggle.AddListener(T => GameEditorApp.instance.GetController<Properties>().RefreshPanel(null));
@@ -80,7 +92,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitColor(BindProperty<Color> from)
         {
-            var colorM = UIObject.GetComponent<AD.UI.ColorManager>();
+            if (!UIObject.TryGetComponent(out AD.UI.ColorManager colorM))
+            {
+                colorM = UIObject.GetComponentsInChildren<AD.UI.ColorManager>()[0];
+            }
             colorM.ColorProperty = from;
             colorM.title.text = this.text;
             ExtensionalSpaceLine = 13;
@@ -88,7 +103,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitVectorField(BindProperty<Vector2> from)
         {
-            var m2F = UIObject.GetComponent<MulVectorField>();
+            if (!UIObject.TryGetComponent(out MulVectorField m2F))
+            {
+                m2F = UIObject.GetComponentsInChildren<MulVectorField>()[0];
+            }
             m2F.AddListener(T=>
             {
                 float x,y;
@@ -104,7 +122,10 @@ namespace AD.Experimental.GameEditor
 
         public void InitVectorField(BindProperty<Vector3> from)
         {
-            var m3F = UIObject.GetComponent<MulVectorField>();
+            if (!UIObject.TryGetComponent(out MulVectorField m3F))
+            {
+                m3F = UIObject.GetComponentsInChildren<MulVectorField>()[0];
+            }
             m3F.AddListener(T=>
             {
                 float x,y,z;
@@ -122,7 +143,10 @@ namespace AD.Experimental.GameEditor
         
         public void InitVectorField(BindProperty<Vector4> from)
         {
-            var m4F = UIObject.GetComponent<MulVectorField>();
+            if (!UIObject.TryGetComponent(out MulVectorField m4F))
+            {
+                m4F = UIObject.GetComponentsInChildren<MulVectorField>()[0];
+            }
             m4F.AddListener(T=>
             {
                 float x,y,z,w;
@@ -139,9 +163,21 @@ namespace AD.Experimental.GameEditor
             });
         }
 
-        public void InitDropDown(string[] operation,UnityAction<int> call)
+        public void InitDropDown(string[] operation, UnityAction<int> call)
         {
-
+            /*if (!UIObject.TryGetComponent(out AD.UI.ListView listV))
+            {
+                listV = UIObject.GetComponentsInChildren<AD.UI.ListView>()[0];
+            }
+            foreach (var single_operation in operation)
+            {
+                var listVitem = listV.GenerateItem();
+                if (!listVitem.TryGetComponent(out AD.UI.Text _title))
+                {
+                    _title = UIObject.GetComponentsInChildren<AD.UI.Text>()[0];
+                }
+                _title.SetText(single_operation);
+            }*/
         }
 
         public void InitEnum<_Enum>(UnityAction<_Enum> call)

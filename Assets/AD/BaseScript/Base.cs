@@ -255,14 +255,6 @@ namespace AD.BASE
     {
         void SendCommand<T>() where T : class, IADCommand, new();
     }
-    public interface ICanGetEvent : ICanGetArchitecture
-    {
-        T GetEvent<T>() where T : class, IADEvent, new();
-    }
-    public interface ICanSendEvent : ICanGetEvent
-    {
-        void SendEvent<T>() where T : class, IADEvent, new();
-    }
     public interface ICanSimulateFunction
     {
         void Execute();
@@ -271,7 +263,7 @@ namespace AD.BASE
 
     public interface ICanMonitorCommand<_Command>where _Command:IADCommand
     {
-        void OnCommandCall();
+        void OnCommandCall(_Command none);
     }
 
     public interface IADArchitecture
@@ -282,18 +274,14 @@ namespace AD.BASE
         _Model GetModel<_Model>() where _Model : class, IADModel, new();
         _System GetSystem<_System>() where _System : class, IADSystem, new();
         _Controller GetController<_Controller>() where _Controller : class, IADController, new();
-        _Event GetEvent<_Event>() where _Event : class, IADEvent, new();
         IADArchitecture RegisterModel<_Model>(_Model model) where _Model : IADModel, new();
         IADArchitecture RegisterSystem<_System>(_System system) where _System : IADSystem, new();
         IADArchitecture RegisterController<_Controller>(_Controller controller) where _Controller : IADController, new();
-        IADArchitecture RegisterEvent<_Event>(_Event _event) where _Event : IADEvent, new();
         IADArchitecture RegisterCommand<_Command>(_Command command) where _Command : IADCommand, new();
         IADArchitecture RegisterModel<_Model>() where _Model : IADModel, new();
         IADArchitecture RegisterSystem<_System>() where _System : IADSystem, new();
         IADArchitecture RegisterController<_Controller>() where _Controller : IADController, new();
         IADArchitecture RegisterCommand<_Command>() where _Command : IADCommand, new();
-        IADArchitecture RegisterEvent<_Event>() where _Event : IADEvent, new();
-        IADArchitecture SendEvent<_Event>() where _Event : class, IADEvent, new();
         IADArchitecture SendCommand<_Command>() where _Command : class, IADCommand, new();
         IADArchitecture UnRegister<_T>() where _T : new();
         bool Contains<_Type>();
@@ -301,6 +289,11 @@ namespace AD.BASE
         public IADArchitecture SendImmediatelyCommand<_Command>(_Command command) where _Command : class, IADCommand, new();
 
         void Diffusing<_Command>() where _Command : IADCommand;
+    }
+
+    public abstract class Vibration
+    {
+        private Vibration() { }
     }
 
     public interface IADModel : ICanInitialize, ICanGetArchitecture
@@ -416,7 +409,7 @@ namespace AD.BASE
 
     }
 
-    public interface IADController : ICanInitialize, ICanGetArchitecture, ICanSendCommand, ICanSendEvent, ICanGetSystem, ICanGetModel
+    public interface IADController : ICanInitialize, ICanGetArchitecture, ICanSendCommand, ICanGetSystem, ICanGetModel
     {
         void RegisterCommand<T>() where T : class, IADCommand, new();
         void RegisterModel<T>() where T : class, IADModel, new();
@@ -449,16 +442,6 @@ namespace AD.BASE
             Architecture = target;
         }
 
-        public T GetEvent<T>() where T : class, IADEvent, new()
-        {
-            return Architecture.GetEvent<T>();
-        }
-
-        public void SendEvent<T>() where T : class, IADEvent, new()
-        {
-            Architecture.SendEvent<T>();
-        }
-
         public T GetSystem<T>() where T : class, IADSystem, new()
         {
             return Architecture.GetSystem<T>();
@@ -483,11 +466,6 @@ namespace AD.BASE
         {
             Architecture.RegisterModel<T>(_Model);
         }
-    }
-
-    public interface IADEvent : ICanGetArchitecture
-    {
-        void Trigger();
     }
 
     public interface IADCommand : ICanGetArchitecture, ICanGetModel, ICanGetController
@@ -757,9 +735,9 @@ namespace AD.BASE
             bool boolen = AD__Objects.ContainsKey(key);
             AD__Objects[key] = _object;
             if (boolen)
-                AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "] again");
-            else
                 AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "]");
+            else
+                AddMessage(_object.GetType().FullName + " is register on slot[" + key.FullName + "] , this slot is been create now");
             return instance;
         }
 
@@ -795,11 +773,6 @@ namespace AD.BASE
             return Get<_Controller>() as _Controller;
         }
 
-        public _Event GetEvent<_Event>() where _Event : class, IADEvent, new()
-        {
-            return Get<_Event>() as _Event;
-        }
-
         public IADArchitecture RegisterModel<_Model>(_Model model) where _Model : IADModel, new()
         {
             Register<_Model>(model);
@@ -824,19 +797,6 @@ namespace AD.BASE
             return instance;
         }
 
-        public IADArchitecture RegisterEvent<_Event>(_Event _event) where _Event : IADEvent, new()
-        {
-            Register<_Event>(_event);
-            _event.SetArchitecture(instance);
-            return instance;
-        }
-
-        public IADArchitecture SendEvent<_Event>() where _Event : class, IADEvent, new()
-        {
-            (Get<_Event>() as _Event).Trigger();
-            return instance;
-        }
-
         public IADArchitecture RegisterModel<_Model>() where _Model : IADModel, new()
         {
             RegisterModel(new _Model());
@@ -852,12 +812,6 @@ namespace AD.BASE
         public IADArchitecture RegisterController<_Controller>() where _Controller : IADController, new()
         {
             RegisterController(new _Controller());
-            return instance;
-        }
-
-        public IADArchitecture RegisterEvent<_Event>() where _Event : IADEvent, new()
-        {
-            RegisterEvent(new _Event());
             return instance;
         }
 
@@ -923,13 +877,18 @@ namespace AD.BASE
 
         #region sFunction
 
+        /// <summary>
+        /// Pass directives (types) to the entire architecture so that registered objects 
+        /// that can accept this type can trigger callbacks
+        /// </summary>
+        /// <typeparam name="_Command"></typeparam>
         public void Diffusing<_Command>()where _Command: IADCommand
         {
             foreach (var item in AD__Objects)
             {
                 if(item.Is(out ICanMonitorCommand<_Command> monitor))
                 {
-                    monitor.OnCommandCall();
+                    monitor.OnCommandCall(default(_Command));
                 }
             }
         }
