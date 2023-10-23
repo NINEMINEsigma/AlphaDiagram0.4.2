@@ -2122,27 +2122,32 @@ namespace AD.BASE
     [Serializable]
     public class ADEvent : UnityEvent
     {
-
+        public ADEvent() { }
+        public ADEvent(UnityAction call) { this.AddListener(call); }
     }
     [Serializable]
     public class ADEvent<T1> : UnityEvent<T1>
     {
-
+        public ADEvent() { }
+        public ADEvent(UnityAction<T1> call) { this.AddListener(call); }
     }
     [Serializable]
     public class ADEvent<T1, T2> : UnityEvent<T1, T2>
     {
-
+        public ADEvent() { }
+        public ADEvent(UnityAction<T1, T2> call) { this.AddListener(call); }
     }
     [Serializable]
     public class ADEvent<T1, T2, T3> : UnityEvent<T1, T2, T3>
     {
-
+        public ADEvent() { }
+        public ADEvent(UnityAction<T1, T2, T3> call) { this.AddListener(call); }
     }
     [Serializable]
     public class ADEvent<T1, T2, T3, T4> : UnityEvent<T1, T2, T3, T4>
     {
-
+        public ADEvent() { }
+        public ADEvent(UnityAction<T1, T2, T3, T4> call) { this.AddListener(call); }
     }
 
     #endregion

@@ -124,7 +124,8 @@ namespace AD.Experimental.GameEditor
         public void Refresh()
         {
             CloseListView();
-            OpenListView();
+            if (this.MatchEditor.IsOpenListView)
+                OpenListView();
         }
     }
 }

@@ -7,14 +7,30 @@ namespace AD.UI
     internal static class CustomWindowGeneratorAssets
     {
         //<Pool,Queue>
-        public static GameObject CustomWindowGeneratorPool;
+        private static GameObject _CustomWindowGeneratorPool;
+        public static GameObject CustomWindowGeneratorPool
+        {
+            get
+            {
+                _CustomWindowGeneratorPool ??= new GameObject("CustomWindowGenerator Pool");
+                return _CustomWindowGeneratorPool;
+            }
+        }
         public static Queue<GameObject> Objects = new();
     }
 
     internal static class CustomWindowGeneratorAssets<T> where T : CustomWindowGenerator<T>
     {
         //<Pool,Queue>
-        public static GameObject CustomWindowGeneratorPool;
+        private static GameObject _CustomWindowGeneratorPool;
+        public static GameObject CustomWindowGeneratorPool
+        {
+            get
+            {
+                _CustomWindowGeneratorPool ??= new GameObject(typeof(T).Name + " Pool");
+                return _CustomWindowGeneratorPool;
+            }
+        }
         public static Queue<GameObject> Objects = new();
     }
 
@@ -26,8 +42,7 @@ namespace AD.UI
 
         public override void Init()
         {
-            if (CustomWindowGeneratorAssets.CustomWindowGeneratorPool != null) GameObject.Destroy(CustomWindowGeneratorAssets.CustomWindowGeneratorPool);
-            CustomWindowGeneratorAssets.CustomWindowGeneratorPool = new GameObject("CustomWindow Pool");
+            CustomWindowGeneratorAssets.CustomWindowGeneratorPool.Is<object>(out var o);
             foreach (var SingleObject in CustomWindowGeneratorAssets.Objects)
                 GameObject.Destroy(SingleObject.As<CustomWindowElement>());
             CustomWindowGeneratorAssets.Objects.Clear();
@@ -70,8 +85,7 @@ namespace AD.UI
 
         public override void Init()
         {
-            if (CustomWindowGeneratorAssets<T>.CustomWindowGeneratorPool != null) GameObject.Destroy(CustomWindowGeneratorAssets<T>.CustomWindowGeneratorPool);
-            CustomWindowGeneratorAssets<T>.CustomWindowGeneratorPool = new GameObject(typeof(T).Name + " Pool");
+            CustomWindowGeneratorAssets<T>.CustomWindowGeneratorPool.Is<object>(out var o);
             foreach (var SingleObject in CustomWindowGeneratorAssets<T>.Objects)
                 GameObject.Destroy(SingleObject.As<CustomWindowElement>());
             CustomWindowGeneratorAssets<T>.Objects.Clear();

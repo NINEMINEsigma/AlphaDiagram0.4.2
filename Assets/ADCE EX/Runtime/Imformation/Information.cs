@@ -18,10 +18,21 @@ namespace AD.Experimental.GameEditor
             set
             {
                 _TaskPercent = Mathf.Clamp(value, 0, 1.01f);
+                GameEditorApp.instance.GetController<Information>()?.Refresh();
             }
         }
         public Vector2 Range = new Vector2(0, 1);
         public bool IsInt;
+
+        public TaskInfo() { }
+        public TaskInfo(string taskName, int taskIndex, float taskPercent, Vector2 range, bool isInt)
+        {
+            TaskName = taskName;
+            TaskIndex = taskIndex;
+            TaskPercent = taskPercent;
+            Range = range;
+            IsInt = isInt;
+        }
 
         public void Wait()
         {
@@ -197,6 +208,7 @@ namespace AD.Experimental.GameEditor
         bool IsOpenTaskPanel = false;
         public void ClickTaskProgramBar()
         {
+            Refresh();
             IsOpenTaskPanel = !IsOpenTaskPanel;
             TaskPanelAnimator.Play(IsOpenTaskPanel ? "Open" : "Hide");
         }

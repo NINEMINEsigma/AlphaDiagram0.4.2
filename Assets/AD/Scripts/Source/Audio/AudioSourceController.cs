@@ -232,7 +232,19 @@ namespace AD.UI
 
             void WhenNeedUpdataCurrentClock()
             {
-                if (!IsPause) CurrentClock += UnityEngine.Time.deltaTime;
+                if (!IsPause)
+                {
+                    CurrentClock += UnityEngine.Time.deltaTime;
+                    if (!IsDelayToStart)
+                    {
+                        float cat = Mathf.Abs(CurrentClock - Source.time);
+                        if (cat > 0.025f)
+                        {
+                            CurrentClock = Source.time;
+                            Debug.LogWarning("音频计时出现误差(" + cat.ToString() + " S)，已尝试同步");
+                        }
+                    }
+                }
             }
 
             void WhenNeedUpdataDelay()

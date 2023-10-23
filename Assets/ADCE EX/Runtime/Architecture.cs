@@ -1,9 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
 using AD.UI;
-using AD.Utility;
-using UnityEngine;
 
 namespace AD.Experimental.GameEditor
 {
@@ -46,9 +43,17 @@ namespace AD.Experimental.GameEditor
 
         public static void SetParent(this ICanSerializeOnCustomEditor self, ICanSerializeOnCustomEditor _Right)
         {
-            self.ParentTarget?.GetChilds().Remove(self);
+            if (self.ParentTarget != null)
+            {
+                self.ParentTarget.GetChilds().Remove(self);
+                self.ParentTarget.MatchHierarchyEditor.MatchItem.Refresh();
+            }
             self.ParentTarget = _Right;
-            _Right?.GetChilds().Add(self);
+            if (_Right != null)
+            {
+                _Right.GetChilds().Add(self);
+                _Right.MatchHierarchyEditor.MatchItem.Refresh();
+            }
         }
 
         //需要在自定义的ISerializeHierarchyEditor.OnSerialize的最前面使用
@@ -56,6 +61,7 @@ namespace AD.Experimental.GameEditor
         {
             if (self.IsOpenListView)
             {
+                self.MatchItem.Refresh();
                 foreach (var item in self.MatchTarget.GetChilds())
                 {
                     item.MatchHierarchyEditor.BaseHierarchyItemSerialize();
@@ -85,6 +91,14 @@ namespace AD.Experimental.GameEditor
                 Architecture.GetController<Properties>().MatchTarget = cat.MatchEditor.MatchTarget;
                 Architecture.GetController<Properties>().ClearAndRefresh();
             }
+        }
+    }
+
+    public class RefreshHierarchyPanel : ADCommand
+    {
+        public override void OnExecute()
+        {
+            Architecture.GetController<Hierarchy>().RefreshPanel();
         }
     }
 
