@@ -25,6 +25,10 @@ namespace AD
             this._action = action;
             this.type = type;
         }
+        ~RegisterInfo()
+        {
+            this.UnRegister();
+        }
 
         public void UnRegister()
         {
@@ -127,22 +131,17 @@ namespace AD
             {
                 if (button.wasReleasedThisFrame)
                 {
-                    isLock = isHit = false;
-                    break;
+                    return false;
                 }
-                if (button.wasPressedThisFrame) isHit = true;
+                else if (button.wasPressedThisFrame) isHit = true;
             }
-            bool result = isHit && !isLock;
-            isLock = isHit;
-            return result;
+            return isHit;
         }
 
         public MulHitSomeControl(List<ButtonControl> targetButtons)
         {
             TargetButtons = targetButtons;
         }
-
-        public bool isLock { get; private set; }
 
         public List<ButtonControl> TargetButtons = null;
 
@@ -194,7 +193,13 @@ namespace AD
         public readonly uint MaxRecordItemCount = 10000;
         public static bool IsKeepException => instance.IsNeedExcepion;
 
-        public ADUI _Toggle, _Slider, _Text, _Button, _RawImage, _InputField;
+        public AD.UI.Toggle _Toggle;
+        public AD.UI.Button _Button;
+        public AD.UI.InputField _InputField;
+        public AD.UI.RawImage _RawImage;
+        public AD.UI.Slider _Slider;
+        public AD.UI.Text _Text;
+        public AD.UI.Dropdown _DropDown;
         public ViewController _Image;
         public AudioSourceController _AudioSource;
         public CustomWindowElement _CustomWindowElement;

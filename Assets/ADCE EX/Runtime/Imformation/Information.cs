@@ -120,6 +120,7 @@ namespace AD.Experimental.GameEditor
 
         public void Update()
         {
+            if (Current == null) return;
             if (Current.TaskPercent >= 1)
             {
                 CompleteTaskCallBack.Invoke(Current);
@@ -270,6 +271,7 @@ namespace AD.Experimental.GameEditor
                 TaskPanelPercentBar.Set(current.TaskPercent, current.Range.x, current.Range.y);
             }
             TaskPanelListView.Clear();
+            if (_m_TaskList.Current == null) return;
             RegisterTaskListItem(_m_TaskList.Current,0);
             for (int i = 0; i < _m_TaskList.Tasks.Count; i++)
             {

@@ -42,41 +42,21 @@ namespace AD.UI
         [MenuItem("GameObject/AD/Text", false, 10)]
         private static void ADD(UnityEditor.MenuCommand menuCommand)
         {
-            AD.UI.Text text;
-            if (ADGlobalSystem.instance != null && ADGlobalSystem.instance._Text != null)
-            {
-                text = GameObject.Instantiate(ADGlobalSystem.instance._Text).GetComponent<AD.UI.Text>();
-                text.name = "New Text";
-            }
-            else
-            {
-                text = new GameObject("New Text").AddComponent<AD.UI.Text>();
-                text.gameObject.AddComponent<TextMeshProUGUI>();
-            }
+            AD.UI.Text text = GameObject.Instantiate(ADGlobalSystem.instance._Text);
+            text.name = "New Text";
             GameObjectUtility.SetParentAndAlign(text.gameObject, menuCommand.context as GameObject);
             Undo.RegisterCreatedObjectUndo(text.gameObject, "Create " + text.name);
             Selection.activeObject = text.gameObject;
         }
 #endif
 
-        public static AD.UI.Text Generate(string name = "New Text", string defaultText = "", Transform parent = null, params System.Type[] components)
+        public static AD.UI.Text Generate(string name = "New Text", string defaultText = "", Transform parent = null)
         {
-
-            AD.UI.Text text;
-            if (ADGlobalSystem.instance != null && ADGlobalSystem.instance._Text != null)
-            {
-                text = GameObject.Instantiate(ADGlobalSystem.instance._Text).GetComponent<AD.UI.Text>();
-                text.name = "New Text";
-            }
-            else
-            {
-                text = new GameObject(name, components).AddComponent<AD.UI.Text>();
-                text.gameObject.AddComponent<TextMeshProUGUI>();
-            }
+            AD.UI.Text text = GameObject.Instantiate(ADGlobalSystem.instance._Text);
+            text.name = name;
             text.transform.SetParent(parent, false);
             text.transform.localPosition = Vector3.zero;
-            text.text = defaultText;
-
+            text.SetText(defaultText);
             return text;
         }
 

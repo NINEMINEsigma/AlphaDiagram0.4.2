@@ -76,6 +76,6 @@ namespace AD.UI
             dragVec = Vector2.zero;
         }
 
-        RegisterInfo LeftRegisterInfo, RightRegisterInfo;
+        public RegisterInfo LeftRegisterInfo, RightRegisterInfo;
     }
 }

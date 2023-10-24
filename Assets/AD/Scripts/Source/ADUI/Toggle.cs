@@ -5,8 +5,6 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using static System.Net.Mime.MediaTypeNames;
-using static UnityEngine.Rendering.DebugUI;
 
 namespace AD.UI
 {
@@ -104,18 +102,7 @@ namespace AD.UI
         [MenuItem("GameObject/AD/Toggle", false, 10)]
         private static void ADD(UnityEditor.MenuCommand menuCommand)
         {
-            AD.UI.Toggle toggle = null;
-            if (ADGlobalSystem.instance._Toggle != null)
-            {
-                toggle = GameObject.Instantiate(ADGlobalSystem.instance._Toggle) as AD.UI.Toggle;
-            }
-            else
-            {
-                toggle = GenerateToggle(); 
-                toggle.background= GenerateBackground(toggle).GetComponent<UnityEngine.UI.Image>();
-                toggle.tab = GenerateTab(toggle).GetComponent<UnityEngine.UI.Image>();
-                toggle.mark = toggle.tab.transform.GetChild(0).gameObject.GetComponent<UnityEngine.UI.Image>();
-            }
+            AD.UI.Toggle toggle = GameObject.Instantiate(ADGlobalSystem.instance._Toggle);
             toggle.name = "New Toggle";
             GameObjectUtility.SetParentAndAlign(toggle.gameObject, menuCommand.context as GameObject);
             Undo.RegisterCreatedObjectUndo(toggle.gameObject, "Create " + toggle.name);
@@ -123,68 +110,13 @@ namespace AD.UI
         }
 #endif
 
-        public static AD.UI.Toggle Generate(string name = "New Text", Transform parent = null, params System.Type[] components)
+        public static AD.UI.Toggle Generate(string name = "New Toggle", Transform parent = null)
         {
-            AD.UI.Toggle toggle = null;
-            if (ADGlobalSystem.instance._Toggle != null)
-            {
-                toggle = GameObject.Instantiate(ADGlobalSystem.instance._Toggle) as AD.UI.Toggle; 
-            }
-            else
-            {
-                toggle = GenerateToggle(); 
-                toggle.title.text = name;
-                foreach (var component in components) toggle.gameObject.AddComponent(component); 
-                toggle.background = GenerateBackground(toggle).GetComponent<UnityEngine.UI.Image>();
-                toggle.tab = GenerateTab(toggle).GetComponent<UnityEngine.UI.Image>();
-                toggle.mark = toggle.tab.transform.GetChild(0).gameObject.GetComponent<UnityEngine.UI.Image>();
-            } 
+            AD.UI.Toggle toggle = GameObject.Instantiate(ADGlobalSystem.instance._Toggle);
             toggle.transform.SetParent(parent, false);
             toggle.transform.localPosition = Vector3.zero;
             toggle.name = name;
-
             return toggle;
-        }
-
-        private static AD.UI.Toggle GenerateToggle()
-        {
-            AD.UI.Toggle toggle = new GameObject("New Toggle", new Type[] { typeof(ContentSizeFitter), typeof(TextMeshProUGUI) }).AddComponent<AD.UI.Toggle>();
-            toggle.title = toggle.GetComponent<TextMeshProUGUI>();
-            toggle.title.text = "Toggle";
-            return toggle;
-        }
-        private static RectTransform GenerateBackground(AD.UI.Toggle toggle)
-        {
-            RectTransform background  = new GameObject("Background").AddComponent<UnityEngine.UI.Image>().gameObject.GetComponent<RectTransform>();
-            background.localPosition = new Vector3(-50, 0, 0);
-            background.anchorMin = new Vector2(0, 0);
-            background.anchorMax = new Vector2(1, 1);
-            background.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 100);
-            background.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 24);
-            background.transform.parent = toggle.transform;
-            return background;
-        } 
-        private static RectTransform GenerateTab(AD.UI.Toggle toggle)
-        {
-            RectTransform tab  = new GameObject("Tab").AddComponent<UnityEngine.UI.Image>().gameObject.GetComponent<RectTransform>();
-            tab.localPosition = new Vector3(-37.5f, 0, 0);
-            tab.anchorMin = new Vector2(0, 0);
-            tab.anchorMax = new Vector2(0, 1);
-            tab.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 20);
-            tab.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 20);
-            tab.transform.parent = toggle.transform;
-            GenerateMark().transform.parent = tab.transform; 
-            return tab;
-        }
-        private static RectTransform GenerateMark()
-        {
-            RectTransform mark = new GameObject("Mark").AddComponent<UnityEngine.UI.Image>().gameObject.GetComponent<RectTransform>();
-            mark.localPosition = new Vector3(0, 0, 0);
-            mark.anchorMin = new Vector2(0, 0);
-            mark.anchorMax = new Vector2(1, 1);
-            mark.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 20);
-            mark.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 20);
-            return mark;
         }
 
         public AD.UI.Toggle AddListener(UnityEngine.Events.UnityAction<bool> action)

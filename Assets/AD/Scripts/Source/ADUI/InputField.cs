@@ -33,15 +33,7 @@ namespace AD.UI
         [MenuItem("GameObject/AD/InputField", false, 10)]
         private static void ADD(UnityEditor.MenuCommand menuCommand)
         {
-            AD.UI.InputField inputField;
-            if (ADGlobalSystem.instance != null && ADGlobalSystem.instance._RawImage != null)
-            {
-                inputField = GameObject.Instantiate(ADGlobalSystem.instance._InputField) as AD.UI.InputField;
-            }
-            else
-            {
-                inputField = new GameObject().AddComponent<AD.UI.InputField>();
-            }
+            AD.UI.InputField inputField = GameObject.Instantiate(ADGlobalSystem.instance._InputField);
             inputField.name = "New InputField";
             GameObjectUtility.SetParentAndAlign(inputField.gameObject, menuCommand.context as GameObject);
             Undo.RegisterCreatedObjectUndo(inputField.gameObject, "Create " + inputField.name);
@@ -49,23 +41,14 @@ namespace AD.UI
         }
 #endif
 
-        public static AD.UI.InputField Generate(string name = "New InputField", Transform parent = null, params System.Type[] components)
+        public static AD.UI.InputField Generate(string name, string defaultText = "", string placeholderText = "Entr Text", Transform parent = null)
         {
-            AD.UI.InputField inputField = null;
-            if (ADGlobalSystem.instance._Slider != null)
-            {
-                inputField = GameObject.Instantiate(ADGlobalSystem.instance._InputField, parent) as AD.UI.InputField;
-            }
-            else
-            {
-                inputField = new GameObject("New InputField", components).AddComponent<AD.UI.InputField>();
-            }
-
+            AD.UI.InputField inputField = GameObject.Instantiate(ADGlobalSystem.instance._InputField);
+            inputField.name = name;
             inputField.transform.SetParent(parent, false);
             inputField.transform.localPosition = Vector3.zero;
-            inputField.name = name;
-            foreach (var component in components) inputField.gameObject.AddComponent(component);
-
+            inputField.SetText(defaultText);
+            inputField.SetPlaceholderText(placeholderText);
             return inputField;
         }
 

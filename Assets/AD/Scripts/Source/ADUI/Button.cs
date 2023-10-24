@@ -20,7 +20,7 @@ namespace AD.UI
 
         //[Header("Animator")]
         public Animator animator = null;
-        public ButtonAnimatorMode ChooseMode= ButtonAnimatorMode.BOOL;
+        public ButtonAnimatorMode ChooseMode = ButtonAnimatorMode.BOOL;
         public string AnimatorBoolString = "IsClick";
         public string AnimatorONString = "In", AnimatorOFFString = "Out";
         //[Header("Event")]
@@ -80,15 +80,7 @@ namespace AD.UI
         [MenuItem("GameObject/AD/Button", false, 10)]
         private static void ADD(UnityEditor.MenuCommand menuCommand)
         {
-            AD.UI.Button button;
-            if (ADGlobalSystem.instance != null && ADGlobalSystem.instance._Button != null)
-            {
-                button = GameObject.Instantiate(ADGlobalSystem.instance._Button) as AD.UI.Button;
-            }
-            else
-            {
-                button = new GameObject().AddComponent<AD.UI.Button>();
-            }
+            AD.UI.Button button = GameObject.Instantiate(ADGlobalSystem.instance._Button);
             button.name = "New Button";
             GameObjectUtility.SetParentAndAlign(button.gameObject, menuCommand.context as GameObject);
             Undo.RegisterCreatedObjectUndo(button.gameObject, "Create " + button.name);
@@ -96,25 +88,19 @@ namespace AD.UI
         }
 #endif
 
-        public static AD.UI.Button Generate(string name = "New Button", Transform parent = null, params System.Type[] components)
+        public static AD.UI.Button Generate(string name, string buttonText, Transform parent = null)
         {
-            AD.UI.Button button = null;
-            if (ADGlobalSystem.instance._Slider != null)
-            {
-                button = GameObject.Instantiate(ADGlobalSystem.instance._Button, parent) as AD.UI.Button;
-            }
-            else
-            {
-                button = new GameObject("New Button", components).AddComponent<AD.UI.Button>(); 
-            }
-
+            AD.UI.Button button = GameObject.Instantiate(ADGlobalSystem.instance._Button, parent);
+            button.name = name;
             button.transform.SetParent(parent, false);
             button.transform.localPosition = Vector3.zero;
-            button.name = name;
-            button.SetTitle(name);
-            foreach (var component in components) button.gameObject.AddComponent(component);
-
+            button.SetTitle(buttonText);
             return button;
+        }
+
+        public static AD.UI.Button Generate(string name, Transform parent = null)
+        {
+            return Generate(name, name, parent);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -156,14 +142,14 @@ namespace AD.UI
 
         public AD.UI.Button SetView(Sprite image)
         {
-            if(this.TryGetComponent<ViewController>(out var viewC))
+            if (this.TryGetComponent<ViewController>(out var viewC))
             {
                 viewC.CurrentImage = image;
             }
-            else if(this.TryGetComponent<Image>(out var imageC))
+            else if (this.TryGetComponent<Image>(out var imageC))
             {
                 imageC.sprite = image;
-            } 
+            }
             return this;
         }
 

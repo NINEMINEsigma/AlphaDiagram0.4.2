@@ -64,7 +64,7 @@ namespace AD.Experimental.GameEditor
                     {
                         return MulVector4Field;
                     }
-                case "DropDown":
+                case "Dropdown":
                     {
                         return DropDown;
                     }
