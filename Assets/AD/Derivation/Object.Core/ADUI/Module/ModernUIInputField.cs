@@ -5,6 +5,11 @@ namespace AD.UI
 {
     public class ModernUIInputField : PropertyModule
     {
+        public ModernUIInputField()
+        {
+            this.ElementArea = nameof(ModernUIInputField);
+        }
+
         [Header("Resources")]
         public AD.UI.Text Title;
         [SerializeField]private AD.UI.InputField _Source;
@@ -29,12 +34,7 @@ namespace AD.UI
 
         // Hidden variables
         private readonly string inAnim = "In";
-        private readonly string outAnim = "Out"; 
-
-        public ModernUIInputField()
-        {
-            ElementArea = "ModernUIInputField";
-        }
+        private readonly string outAnim = "Out";
 
         protected override void Start()
         {

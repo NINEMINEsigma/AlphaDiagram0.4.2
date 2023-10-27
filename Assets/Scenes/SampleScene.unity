@@ -268,70 +268,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 28548271, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 28548271, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.00015258789
-      objectReference: {fileID: 0}
-    - target: {fileID: 360690151, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 360690151, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 360690151, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 779506451, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: dropdownItems.Array.data[0].OnItemSelection.m_PersistentCalls.m_Calls.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 779506451, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: dropdownItems.Array.data[0].OnItemSelection.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 779506451, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: dropdownItems.Array.data[0].OnItemSelection.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 1179006097, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: setHighPriorty
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1256046458, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_Options.m_Options.Array.size
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1256046458, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_Options.m_Options.Array.data[1].m_Text
-      value: Default
-      objectReference: {fileID: 0}
-    - target: {fileID: 1384961005, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1384961005, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1384961005, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1645017655, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1645017655, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: -0.000061035156
-      objectReference: {fileID: 0}
     - target: {fileID: 1139863881069025162, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -380,17 +316,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Main - Ichni
       objectReference: {fileID: 0}
-    - target: {fileID: 3828384121249431362, guid: e120e030879ca7648888b946e99517c6, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: -394.99994
-      objectReference: {fileID: 0}
     - target: {fileID: 5377130230291903218, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5377130230291903218, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.000030517578
+      value: 0.000015258789
       objectReference: {fileID: 0}
     - target: {fileID: 5377130230982201659, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_AnchorMax.x
@@ -430,7 +362,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6662889041138335953, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000039100647
+      value: -0.00038027763
       objectReference: {fileID: 0}
     - target: {fileID: 6662889042227346298, guid: e120e030879ca7648888b946e99517c6, type: 3}
       propertyPath: m_AnchorMax.x

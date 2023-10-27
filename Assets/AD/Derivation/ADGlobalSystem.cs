@@ -182,13 +182,20 @@ namespace AD
                 }
                 if (_m_instance == null)
                 {
-                    _m_instance = new GameObject().AddComponent<ADGlobalSystem>();
-                    _m_instance.name = "GlobalSystem";
+                    try
+                    {
+                        _m_instance = GameObject.Instantiate(Resources.Load<GameObject>("GlobalSystem")).GetComponent<ADGlobalSystem>();
+                    }
+                    catch
+                    {
+                        _m_instance = new GameObject().AddComponent<ADGlobalSystem>();
+                        _m_instance.name = "GlobalSystem";
+                    }
                 }
                 return _m_instance;
             }
         }
-
+    
         [Space(20),Header("GlobalSystem")]
         public bool IsNeedExcepion = true;
         public readonly uint MaxRecordItemCount = 10000;

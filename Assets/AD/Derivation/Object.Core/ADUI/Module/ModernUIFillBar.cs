@@ -15,6 +15,11 @@ namespace AD.UI
 
     public class ModernUIFillBar : PropertyModule, IHaveValue
     {
+        public ModernUIFillBar()
+        {
+            this.ElementArea = nameof(ModernUIFillBar);
+        }
+
         // Content
         [Range(0, 1)] public float currentPercent;
         public float minValue = 0;

@@ -11,6 +11,12 @@ namespace AD.UI
 {
     public abstract class ListViewItem : PropertyModule,IComparable<ListViewItem>
     {
+
+        public ListViewItem()
+        {
+            this.ElementArea = nameof(ListViewItem);
+        }
+
         public abstract ListViewItem Init();
 
         public virtual int CompareTo(ListViewItem other)
@@ -23,6 +29,11 @@ namespace AD.UI
 
     public class ListView : PropertyModule
     {
+        public ListView()
+        {
+            this.ElementArea = nameof(ListView);
+        }
+
         public static readonly string ListViewDefaultPerfabSpawnKey = "ListViewDefault";
         public static string LVDPSK => ListViewDefaultPerfabSpawnKey;
 

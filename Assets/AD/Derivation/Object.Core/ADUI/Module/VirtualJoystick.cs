@@ -57,7 +57,7 @@ namespace AD.UI
 
         public VirtualJoystick()
         {
-            ElementArea = "VirtualJoystick";
+            ElementArea = nameof(VirtualJoystick);
         }
 
         [SerializeField] private bool IsDrag = false;
