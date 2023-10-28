@@ -39,7 +39,6 @@ namespace AD.UI
 
         // Items
         public List<Item> dropdownItems = new();
-        public List<Item> dropdownItems_Select = new();
 
         // Other variables
         string textHelper;
@@ -158,7 +157,6 @@ namespace AD.UI
                     }
                     else current.selectOrder = maxSelect;
                 }
-                dropdownItems_Select.Add(target);
             }
             else
             {
@@ -168,7 +166,6 @@ namespace AD.UI
                         dropdownItems[i].selectOrder = Mathf.Clamp(dropdownItems[i].selectOrder + 1, 0, maxSelect);
                     else dropdownItems[i].selectOrder = 0;
                 }
-                dropdownItems_Select.Remove(target);
             }
         }
 

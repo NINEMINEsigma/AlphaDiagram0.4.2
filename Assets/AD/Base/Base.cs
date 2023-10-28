@@ -263,7 +263,7 @@ namespace AD.BASE
 
     public interface ICanMonitorCommand<_Command>where _Command:IADCommand
     {
-        void OnCommandCall(_Command none);
+        void OnCommandCall(_Command c);
     }
 
     public interface IADArchitecture
@@ -289,11 +289,20 @@ namespace AD.BASE
         public IADArchitecture SendImmediatelyCommand<_Command>(_Command command) where _Command : class, IADCommand, new();
 
         void Diffusing<_Command>() where _Command : IADCommand;
+        void Diffusing<_Command>(_Command command) where _Command : IADCommand;
+        void Send<_Command, _CanMonitorCommand>() where _Command : IADCommand where _CanMonitorCommand :class, ICanMonitorCommand<_Command>;
+        void Send<_Command, _CanMonitorCommand>(_Command command) where _Command : IADCommand where _CanMonitorCommand :class, ICanMonitorCommand<_Command>;
     }
 
-    public abstract class Vibration
+    //Diffusing Command
+    public class Vibration : ADCommand
     {
         private Vibration() { }
+
+        public override void OnExecute()
+        {
+
+        }
     }
 
     public interface IADModel : ICanInitialize, ICanGetArchitecture
@@ -888,8 +897,60 @@ namespace AD.BASE
             {
                 if(item.Is(out ICanMonitorCommand<_Command> monitor))
                 {
-                    monitor.OnCommandCall(default(_Command));
+                    monitor.OnCommandCall(default);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Pass directives (types) to the entire architecture so that registered objects 
+        /// that can accept this type can trigger callbacks
+        /// </summary>
+        /// <typeparam name="_Command"></typeparam>
+        public void Diffusing<_Command>(_Command command) where _Command : IADCommand
+        {
+            foreach (var item in AD__Objects)
+            {
+                if (item.Is(out ICanMonitorCommand<_Command> monitor))
+                {
+                    monitor.OnCommandCall(command);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Provides an easy way to propagate directives in a targeted manner, using a common flag class to enable the target class to call
+        /// <para> a predetermined function (the predecessor of the convention pattern) </para>
+        /// </summary>
+        /// <typeparam name="_Command"></typeparam>
+        /// <typeparam name="_CanMonitorCommand"></typeparam>
+        public void Send<_Command, _CanMonitorCommand>(_Command command) where _Command : IADCommand where _CanMonitorCommand :class, ICanMonitorCommand<_Command>
+        {
+            if(AD__Objects.TryGetValue(typeof(_CanMonitorCommand),out object target))
+            {
+                target.As<_CanMonitorCommand>().OnCommandCall(command);
+            }
+            else
+            {
+                AddMessage(typeof(_CanMonitorCommand).Name + " is not register");
+            }
+        }
+
+        /// <summary>
+        /// Provides an easy way to propagate directives in a targeted manner, using a common flag class to enable the target class to call
+        /// <para> a predetermined function (the predecessor of the convention pattern) </para>
+        /// </summary>
+        /// <typeparam name="_Command"></typeparam>
+        /// <typeparam name="_CanMonitorCommand"></typeparam>
+        public void Send<_Command, _CanMonitorCommand>() where _Command : IADCommand where _CanMonitorCommand : class, ICanMonitorCommand<_Command>
+        {
+            if (AD__Objects.TryGetValue(typeof(_CanMonitorCommand), out object target))
+            {
+                target.As<_CanMonitorCommand>().OnCommandCall(default);
+            }
+            else
+            {
+                AddMessage(typeof(_CanMonitorCommand).Name + " is not register");
             }
         }
 
@@ -931,492 +992,6 @@ namespace AD.BASE
 
     #region Event from Unity & ExtAD
 
-    /*
-    [Serializable]
-    [UsedByNativeCode]
-    public abstract class UnityEventBase : ISerializationCallbackReceiver
-    {
-        private InvokableCallList m_Calls;
-
-        [SerializeField]
-        [FormerlySerializedAs("m_PersistentListeners")]
-        private PersistentCallGroup m_PersistentCalls;
-
-        private bool m_CallsDirty = true;
-
-        protected UnityEventBase()
-        {
-            m_Calls = new InvokableCallList();
-            m_PersistentCalls = new PersistentCallGroup();
-        }
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            DirtyPersistentCalls();
-        }
-
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            DirtyPersistentCalls();
-        }
-
-        protected MethodInfo FindMethod_Impl(string name, object targetObj)
-        {
-            return FindMethod_Impl(name, targetObj.GetType());
-        }
-
-        protected abstract MethodInfo FindMethod_Impl(string name, Type targetObjType);
-
-        internal abstract BaseInvokableCall GetDelegate(object target, MethodInfo theFunction);
-
-        internal MethodInfo FindMethod(PersistentCall call)
-        {
-            Type argumentType = typeof(Object);
-            if (!string.IsNullOrEmpty(call.arguments.unityObjectArgumentAssemblyTypeName))
-            {
-                argumentType = Type.GetType(call.arguments.unityObjectArgumentAssemblyTypeName, throwOnError: false) ?? typeof(Object);
-            }
-
-            Type listenerType = ((call.target != null) ? call.target.GetType() : Type.GetType(call.targetAssemblyTypeName, throwOnError: false));
-            return FindMethod(call.methodName, listenerType, call.mode, argumentType);
-        }
-
-        internal MethodInfo FindMethod(string name, Type listenerType, PersistentListenerMode mode, Type argumentType)
-        {
-            return mode switch
-            {
-                PersistentListenerMode.EventDefined => FindMethod_Impl(name, listenerType),
-                PersistentListenerMode.Void => GetValidMethodInfo(listenerType, name, new Type[0]),
-                PersistentListenerMode.Float => GetValidMethodInfo(listenerType, name, new Type[1] { typeof(float) }),
-                PersistentListenerMode.Int => GetValidMethodInfo(listenerType, name, new Type[1] { typeof(int) }),
-                PersistentListenerMode.Bool => GetValidMethodInfo(listenerType, name, new Type[1] { typeof(bool) }),
-                PersistentListenerMode.String => GetValidMethodInfo(listenerType, name, new Type[1] { typeof(string) }),
-                PersistentListenerMode.Object => GetValidMethodInfo(listenerType, name, new Type[1] { argumentType ?? typeof(Object) }),
-                _ => null,
-            };
-        }
-
-        //
-        // 摘要:
-        //     Get the number of registered persistent listeners.
-        public int GetPersistentEventCount()
-        {
-            return m_PersistentCalls.Count;
-        }
-
-        //
-        // 摘要:
-        //     Get the target component of the listener at index index.
-        //
-        // 参数:
-        //   index:
-        //     Index of the listener to query.
-        public Object GetPersistentTarget(int index)
-        {
-            return m_PersistentCalls.GetListener(index)?.target;
-        }
-
-        //
-        // 摘要:
-        //     Get the target method name of the listener at index index.
-        //
-        // 参数:
-        //   index:
-        //     Index of the listener to query.
-        public string GetPersistentMethodName(int index)
-        {
-            PersistentCall listener = m_PersistentCalls.GetListener(index);
-            return (listener != null) ? listener.methodName : string.Empty;
-        }
-
-        private void DirtyPersistentCalls()
-        {
-            m_Calls.ClearPersistent();
-            m_CallsDirty = true;
-        }
-
-        private void RebuildPersistentCallsIfNeeded()
-        {
-            if (m_CallsDirty)
-            {
-                m_PersistentCalls.Initialize(m_Calls, this);
-                m_CallsDirty = false;
-            }
-        }
-
-        //
-        // 摘要:
-        //     Modify the execution state of a persistent listener.
-        //
-        // 参数:
-        //   index:
-        //     Index of the listener to query.
-        //
-        //   state:
-        //     State to set.
-        public void SetPersistentListenerState(int index, UnityEventCallState state)
-        {
-            PersistentCall listener = m_PersistentCalls.GetListener(index);
-            if (listener != null)
-            {
-                listener.callState = state;
-            }
-
-            DirtyPersistentCalls();
-        }
-
-        //
-        // 摘要:
-        //     Returns the execution state of a persistent listener.
-        //
-        // 参数:
-        //   index:
-        //     Index of the listener to query.
-        //
-        // 返回结果:
-        //     Execution state of the persistent listener.
-        public UnityEventCallState GetPersistentListenerState(int index)
-        {
-            if (index < 0 || index > m_PersistentCalls.Count)
-            {
-                throw new IndexOutOfRangeException($"Index {index} is out of range of the {GetPersistentEventCount()} persistent listeners.");
-            }
-
-            return m_PersistentCalls.GetListener(index).callState;
-        }
-
-        protected void AddListener(object targetObj, MethodInfo method)
-        {
-            m_Calls.AddListener(GetDelegate(targetObj, method));
-        }
-
-        internal void AddCall(BaseInvokableCall call)
-        {
-            m_Calls.AddListener(call);
-        }
-
-        protected void RemoveListener(object targetObj, MethodInfo method)
-        {
-            m_Calls.RemoveListener(targetObj, method);
-        }
-
-        //
-        // 摘要:
-        //     Remove all non-persisent (ie created from script) listeners from the event.
-        public void RemoveAllListeners()
-        {
-            m_Calls.Clear();
-        }
-
-        internal List<BaseInvokableCall> PrepareInvoke()
-        {
-            RebuildPersistentCallsIfNeeded();
-            return m_Calls.PrepareInvoke();
-        }
-
-        protected void Invoke(object[] parameters)
-        {
-            List<BaseInvokableCall> list = PrepareInvoke();
-            for (int i = 0; i < list.Count; i++)
-            {
-                list[i].Invoke(parameters);
-            }
-        }
-
-        public override string ToString()
-        {
-            return BASE.ToString() + " " + GetType().FullName;
-        }
-
-        //
-        // 摘要:
-        //     Given an object, function name, and a list of argument types; find the method
-        //     that matches.
-        //
-        // 参数:
-        //   obj:
-        //     Object to search for the method.
-        //
-        //   functionName:
-        //     Function name to search for.
-        //
-        //   argumentTypes:
-        //     Argument types for the function.
-        public static MethodInfo GetValidMethodInfo(object obj, string functionName, Type[] argumentTypes)
-        {
-            return GetValidMethodInfo(obj.GetType(), functionName, argumentTypes);
-        }
-
-        //
-        // 摘要:
-        //     Given an object type, function name, and a list of argument types; find the method
-        //     that matches.
-        //
-        // 参数:
-        //   objectType:
-        //     Object type to search for the method.
-        //
-        //   functionName:
-        //     Function name to search for.
-        //
-        //   argumentTypes:
-        //     Argument types for the function.
-        public static MethodInfo GetValidMethodInfo(Type objectType, string functionName, Type[] argumentTypes)
-        {
-            while ((object)objectType != typeof(object) && (object)objectType != null)
-            {
-                MethodInfo method = objectType.GetMethod(functionName, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static, null, argumentTypes, null);
-                if ((object)method != null)
-                {
-                    ParameterInfo[] parameters = method.GetParameters();
-                    bool flag = true;
-                    int num = 0;
-                    ParameterInfo[] array = parameters;
-                    foreach (ParameterInfo parameterInfo in array)
-                    {
-                        Type type = argumentTypes[num];
-                        Type parameterType = parameterInfo.ParameterType;
-                        flag = type.IsPrimitive == parameterType.IsPrimitive;
-                        if (!flag)
-                        {
-                            break;
-                        }
-
-                        num++;
-                    }
-
-                    if (flag)
-                    {
-                        return method;
-                    }
-                }
-
-                objectType = objectType.BaseType;
-            }
-
-            return null;
-        }
-
-        protected bool ValidateRegistration(MethodInfo method, object targetObj, PersistentListenerMode mode)
-        {
-            return ValidateRegistration(method, targetObj, mode, typeof(Object));
-        }
-
-        protected bool ValidateRegistration(MethodInfo method, object targetObj, PersistentListenerMode mode, Type argumentType)
-        {
-            if ((object)method == null)
-            {
-                throw new ArgumentNullException("method", UnityString.Format("Can not register null method on {0} for callback!", targetObj));
-            }
-
-            if ((object)method.DeclaringType == null)
-            {
-                throw new NullReferenceException(UnityString.Format("Method '{0}' declaring type is null, global methods are not supported", method.Name));
-            }
-
-            Type type;
-            if (!method.IsStatic)
-            {
-                Object @object = targetObj as Object;
-                if (@object == null || @object.GetInstanceID() == 0)
-                {
-                    throw new ArgumentException(UnityString.Format("Could not register callback {0} on {1}. The class {2} does not derive from UnityEngine.Object", method.Name, targetObj, (targetObj == null) ? "null" : targetObj.GetType().ToString()));
-                }
-
-                type = @object.GetType();
-                if (!method.DeclaringType.IsAssignableFrom(type))
-                {
-                    throw new ArgumentException(UnityString.Format("Method '{0}' declaring type '{1}' is not assignable from object type '{2}'", method.Name, method.DeclaringType.Name, @object.GetType().Name));
-                }
-            }
-            else
-            {
-                type = method.DeclaringType;
-            }
-
-            if ((object)FindMethod(method.Name, type, mode, argumentType) == null)
-            {
-                Debug.LogWarning(UnityString.Format("Could not register listener {0}.{1} on {2} the method could not be found.", targetObj, method, GetType()));
-                return false;
-            }
-
-            return true;
-        }
-
-        internal void AddPersistentListener()
-        {
-            m_PersistentCalls.AddListener();
-        }
-
-        protected void RegisterPersistentListener(int index, object targetObj, MethodInfo method)
-        {
-            RegisterPersistentListener(index, targetObj, targetObj.GetType(), method);
-        }
-
-        protected void RegisterPersistentListener(int index, object targetObj, Type targetObjType, MethodInfo method)
-        {
-            if (ValidateRegistration(method, targetObj, PersistentListenerMode.EventDefined))
-            {
-                m_PersistentCalls.RegisterEventPersistentListener(index, targetObj as Object, targetObjType, method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void RemovePersistentListener(Object target, MethodInfo method)
-        {
-            if ((object)method != null)
-            {
-                m_PersistentCalls.RemoveListeners(target, method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void RemovePersistentListener(int index)
-        {
-            m_PersistentCalls.RemoveListener(index);
-            DirtyPersistentCalls();
-        }
-
-        internal void UnregisterPersistentListener(int index)
-        {
-            m_PersistentCalls.UnregisterPersistentListener(index);
-            DirtyPersistentCalls();
-        }
-
-        internal void AddVoidPersistentListener(UnityAction call)
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterVoidPersistentListener(persistentEventCount, call);
-        }
-
-        internal void RegisterVoidPersistentListener(int index, UnityAction call)
-        {
-            if (call == null)
-            {
-                Debug.LogWarning("Registering a Listener requires an action");
-            }
-            else if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.Void))
-            {
-                m_PersistentCalls.RegisterVoidPersistentListener(index, call.Target as Object, call.Method.DeclaringType, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void RegisterVoidPersistentListenerWithoutValidation(int index, Object target, string methodName)
-        {
-            RegisterVoidPersistentListenerWithoutValidation(index, target, target.GetType(), methodName);
-        }
-
-        internal void RegisterVoidPersistentListenerWithoutValidation(int index, Object target, Type targetType, string methodName)
-        {
-            m_PersistentCalls.RegisterVoidPersistentListener(index, target, targetType, methodName);
-            DirtyPersistentCalls();
-        }
-
-        internal void AddIntPersistentListener(UnityAction<int> call, int argument)
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterIntPersistentListener(persistentEventCount, call, argument);
-        }
-
-        internal void RegisterIntPersistentListener(int index, UnityAction<int> call, int argument)
-        {
-            if (call == null)
-            {
-                Debug.LogWarning("Registering a Listener requires an action");
-            }
-            else if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.Int))
-            {
-                m_PersistentCalls.RegisterIntPersistentListener(index, call.Target as Object, call.Method.DeclaringType, argument, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void AddFloatPersistentListener(UnityAction<float> call, float argument)
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterFloatPersistentListener(persistentEventCount, call, argument);
-        }
-
-        internal void RegisterFloatPersistentListener(int index, UnityAction<float> call, float argument)
-        {
-            if (call == null)
-            {
-                Debug.LogWarning("Registering a Listener requires an action");
-            }
-            else if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.Float))
-            {
-                m_PersistentCalls.RegisterFloatPersistentListener(index, call.Target as Object, call.Method.DeclaringType, argument, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void AddBoolPersistentListener(UnityAction<bool> call, bool argument)
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterBoolPersistentListener(persistentEventCount, call, argument);
-        }
-
-        internal void RegisterBoolPersistentListener(int index, UnityAction<bool> call, bool argument)
-        {
-            if (call == null)
-            {
-                Debug.LogWarning("Registering a Listener requires an action");
-            }
-            else if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.Bool))
-            {
-                m_PersistentCalls.RegisterBoolPersistentListener(index, call.Target as Object, call.Method.DeclaringType, argument, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void AddStringPersistentListener(UnityAction<string> call, string argument)
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterStringPersistentListener(persistentEventCount, call, argument);
-        }
-
-        internal void RegisterStringPersistentListener(int index, UnityAction<string> call, string argument)
-        {
-            if (call == null)
-            {
-                Debug.LogWarning("Registering a Listener requires an action");
-            }
-            else if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.String))
-            {
-                m_PersistentCalls.RegisterStringPersistentListener(index, call.Target as Object, call.Method.DeclaringType, argument, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-
-        internal void AddObjectPersistentListener<T>(UnityAction<T> call, T argument) where T : Object
-        {
-            int persistentEventCount = GetPersistentEventCount();
-            AddPersistentListener();
-            RegisterObjectPersistentListener(persistentEventCount, call, argument);
-        }
-
-        internal void RegisterObjectPersistentListener<T>(int index, UnityAction<T> call, T argument) where T : Object
-        {
-            if (call == null)
-            {
-                throw new ArgumentNullException("call", "Registering a Listener requires a non null call");
-            }
-
-            if (ValidateRegistration(call.Method, call.Target, PersistentListenerMode.Object, ((Object)argument == (Object)null) ? typeof(Object) : argument.GetType()))
-            {
-                m_PersistentCalls.RegisterObjectPersistentListener(index, call.Target as Object, call.Method.DeclaringType, argument, call.Method.Name);
-                DirtyPersistentCalls();
-            }
-        }
-    }
-    */
-
     public abstract class ADBaseInvokableCall
     {
         protected ADBaseInvokableCall()
@@ -1434,12 +1009,12 @@ namespace AD.BASE
             {
                 if (target != null)
                 {
-                    throw new ArgumentException("target must be null");
+                    throw new ArgumentException("_Target must be null");
                 }
             }
             else if (target == null)
             {
-                throw new ArgumentNullException("target");
+                throw new ArgumentNullException("_Target");
             }
         }
 
@@ -2697,7 +2272,7 @@ namespace AD.BASE
     {
         public static T As<T>(this object self) where T : class
         {
-            if (self == null) throw new ADException("Now As.self is null");
+            if (self == null) throw new ADException("Now As._Left is null");
             return self as T;
         }
 
@@ -2740,6 +2315,32 @@ namespace AD.BASE
             return self.IsAssignableFrom(target) || self.IsSubclassOf(target);
         }
 
+        public enum ClassCorrelation
+        {
+            None, Base, Derived
+        }
+
+        public static ClassCorrelation DetectCorrelation(Type _Left, Type _Target)
+        {
+            if (_Left.IsAssignableFrom(_Target)) return ClassCorrelation.Base;
+            else if (_Left.IsSubclassOf(_Target)) return ClassCorrelation.Derived;
+            else return ClassCorrelation.None;
+        }
+
+        public static ClassCorrelation DetectCorrelation(object _Left, object _Target)
+        {
+            return DetectCorrelation(_Left.GetType(), _Target.GetType());
+        }
+
+        public static GameObject PrefabInstantiate(this GameObject self)
+        {
+            return GameObject.Instantiate(self);
+        }
+
+        public static T PrefabInstantiate<T>(this T self) where T : Component
+        {
+            return GameObject.Instantiate(self).GetComponent<T>();
+        }
     }
 
     #endregion

@@ -201,16 +201,35 @@ namespace AD
         public readonly uint MaxRecordItemCount = 10000;
         public static bool IsKeepException => instance.IsNeedExcepion;
 
-        public AD.UI.Toggle _Toggle;
         public AD.UI.Button _Button;
+        public AD.UI.Dropdown _DropDown;
         public AD.UI.InputField _InputField;
         public AD.UI.RawImage _RawImage;
         public AD.UI.Slider _Slider;
         public AD.UI.Text _Text;
-        public AD.UI.Dropdown _DropDown;
+        public AD.UI.Toggle _Toggle;
+
+        public AD.UI.ModernUIButton _ModernButton;
+        public AD.UI.ModernUIDropdown _ModernUIDropdown;
+        public AD.UI.ModernUIFillBar _ModernUIFillBar;
+        public AD.UI.ModernUIInputField _ModernUIInputField;
+
         public ViewController _Image;
+        public ColorManager _ColorManager;
         public AudioSourceController _AudioSource;
         public CustomWindowElement _CustomWindowElement;
+
+        public static T GenerateElement<T>()where T:ADUI
+        {
+            try
+            {
+                return instance.GetFieldByName<T>("_" + typeof(T).Name);
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
 #if UNITY_EDITOR
         [MenuItem("GameObject/AD/GlobalSystem", false, 10)]

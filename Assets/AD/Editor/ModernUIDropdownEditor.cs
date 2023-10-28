@@ -25,7 +25,6 @@ public class ModernUIDropdownEditor : ADUIEditor
     SerializedProperty isListItem;
     SerializedProperty animationType;
     SerializedProperty maxSelect;
-    SerializedProperty dropdownItems_Select;
     SerializedProperty title;
     SerializedProperty icon;
 
@@ -48,7 +47,6 @@ public class ModernUIDropdownEditor : ADUIEditor
         isListItem = serializedObject.FindProperty("isListItem");
         animationType = serializedObject.FindProperty("animationType");
         maxSelect = serializedObject.FindProperty("maxSelect");
-        dropdownItems_Select = serializedObject.FindProperty("dropdownItems_Select");
         title = serializedObject.FindProperty("title");
         icon = serializedObject.FindProperty("icon");
     }
@@ -68,11 +66,8 @@ public class ModernUIDropdownEditor : ADUIEditor
 
         GUILayout.EndVertical();
 
-        this.OnNotChangeGUI(() =>
-        {
-            EditorGUILayout.PropertyField(dropdownItems_Select, new GUIContent("Dropdown Items"), true);
-            dropdownItems.isExpanded = true;
-        });
+        if (GUILayout.Button("---  Refresh  ---", customSkin.button))
+            that.SetupDropdown();
     }
 
     public override void OnResourcesGUI()

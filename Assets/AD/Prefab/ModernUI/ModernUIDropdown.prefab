@@ -268,14 +268,14 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1695362349713964989}
+  - component: {fileID: 1695362349713964990}
   - component: {fileID: 1695362349713964977}
   - component: {fileID: 1695362349713964976}
   - component: {fileID: 1695362349713964991}
-  - component: {fileID: 1695362349713964990}
   m_Layer: 5
   m_Name: ModernUIDropdown
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2800000, guid: 76f0068f1aa70bf4cbd8d3ed60ea5dc5, type: 3}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -301,6 +301,45 @@ RectTransform:
   m_AnchoredPosition: {x: 626, y: 25}
   m_SizeDelta: {x: 400, y: 55}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1695362349713964990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695362349713964988}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90d3b21e7bae625459a327a5eddd3ff9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Selected: 0
+  ElementArea: ModernUIDropdown
+  triggerObject: {fileID: 1695362349595437439}
+  itemParent: {fileID: 1695362349749063375}
+  itemObject: {fileID: 2255264167481400922, guid: 59770683aec064a4fab4d6bf60fce2df, type: 3}
+  scrollbar: {fileID: 1695362351176760376}
+  listParent: {fileID: 0}
+  setItemText: {fileID: 0}
+  title: {fileID: 1695362350035700554}
+  icon: {fileID: 1695362349995554418}
+  enableIcon: 1
+  enableTrigger: 1
+  enableScrollbar: 1
+  setHighPriorty: 1
+  outOnPointerExit: 0
+  isListItem: 0
+  maxSelect: 1
+  animationType: 2
+  dropdownItems:
+  - itemName: Default
+    ToggleItem: {fileID: 0}
+    selectOrder: 0
+    toggleEvents:
+      m_PersistentCalls:
+        m_Calls: []
+  iHelper: 0
+  siblingIndex: 0
 --- !u!222 &1695362349713964977
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -385,46 +424,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &1695362349713964990
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1695362349713964988}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90d3b21e7bae625459a327a5eddd3ff9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Selected: 0
-  ElementArea: ModernUIDropdown
-  triggerObject: {fileID: 1695362349595437439}
-  itemParent: {fileID: 1695362349749063375}
-  itemObject: {fileID: 2255264167481400922, guid: 59770683aec064a4fab4d6bf60fce2df, type: 3}
-  scrollbar: {fileID: 1695362351176760376}
-  listParent: {fileID: 0}
-  setItemText: {fileID: 0}
-  title: {fileID: 1695362350035700554}
-  icon: {fileID: 1695362349995554418}
-  enableIcon: 1
-  enableTrigger: 1
-  enableScrollbar: 1
-  setHighPriorty: 1
-  outOnPointerExit: 0
-  isListItem: 0
-  maxSelect: 2
-  animationType: 2
-  dropdownItems:
-  - itemName: Default
-    ToggleItem: {fileID: 0}
-    selectOrder: 0
-    toggleEvents:
-      m_PersistentCalls:
-        m_Calls: []
-  dropdownItems_Select: []
-  iHelper: 0
-  siblingIndex: 0
 --- !u!1 &1695362349749063374
 GameObject:
   m_ObjectHideFlags: 0

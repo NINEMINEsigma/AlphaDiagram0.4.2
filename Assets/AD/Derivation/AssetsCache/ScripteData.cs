@@ -71,6 +71,7 @@ namespace AD.Experimental.EditorAsset.Cache
 
     /// <summary>
     /// 这个类的缓存方式使用IBase&IBaseMap的虚拟的序列化和反序列化方式来实现本地化和内存化
+    /// [CreateAssetMenu(fileName = "New _", menuName = "AD/_", order = 10)]
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Serializable]

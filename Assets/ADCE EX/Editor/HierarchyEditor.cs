@@ -77,8 +77,6 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
 
         MatchItem.SetTitle("Test 1");
 
-        AD.Experimental.GameEditor.PropertiesLayout.Label("This Is One Test Label");
-        AD.Experimental.GameEditor.PropertiesLayout.Color("Color", _Color);
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();
     }
@@ -104,13 +102,6 @@ public class TestSerializePropertiesEditor2 : ISerializePropertiesEditor
 
         MatchItem.SetTitle("Test 2");
 
-        AD.Experimental.GameEditor.PropertiesLayout.BeginHorizontal();
-
-        AD.Experimental.GameEditor.PropertiesLayout.Label("This Is Index : ");
-        Property.Set(MatchTarget.SerializeIndex.ToString());
-        AD.Experimental.GameEditor.PropertiesLayout.TextField("Index", Property);
-
-        AD.Experimental.GameEditor.PropertiesLayout.EndHorizontal();
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();
     }

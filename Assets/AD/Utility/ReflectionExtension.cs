@@ -5,6 +5,30 @@ using AD.Utility.Pipe;
 
 namespace AD.Utility
 {
+
+    [Serializable]
+    public class ReflectionException : ADException
+    {
+        public ReflectionException() { }
+        public ReflectionException(string message) : base(message) { }
+        public ReflectionException(string message, Exception inner) : base(message, inner) { }
+        protected ReflectionException(
+          System.Runtime.Serialization.SerializationInfo info,
+          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
+
+    [Serializable]
+    public class FieldException : ReflectionException
+    {
+        public FieldException() : base("Error : Field") { }
+    }
+
+    [Serializable]
+    public class MethodException : ReflectionException
+    {
+        public MethodException():base("Error : Method") { }
+    }
+
     public static class ReflectionExtension
     {
         public static readonly BindingFlags DefaultBindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
@@ -138,7 +162,7 @@ namespace AD.Utility
                 else if (currentArgsStrs[j][0] == '$')
                     currentArgs[j] = float.Parse(currentArgsStrs[j][1..]);
                 else if (!self.FullAutoRun(out currentArgs[j], currentArgsStrs[j]).result)
-                    throw new ADException("Parse Error : ResultValue");
+                    throw new ReflectionException("Parse Error : ResultValue");
             }
             return currentArgs;
         }
@@ -153,8 +177,8 @@ namespace AD.Utility
                 currentArgs = GetCurrentArgsWhenNeedArgs(self, currentCallingName[a_s..b_s]);
             }
             MethodBase method =
-                current.target.GetType().GetMethod(currentCallingName[..(a_s - 1)], DefaultBindingFlags) 
-                ?? throw new ADException("Parse Error : Method");
+                current.target.GetType().GetMethod(currentCallingName[..(a_s - 1)], DefaultBindingFlags)
+                ?? throw new MethodException();
             currentTarget = method.Invoke(current.target, currentArgs);
             return currentTarget;
         }
@@ -163,8 +187,8 @@ namespace AD.Utility
         {
             object currentTarget;
             FieldInfo data =
-                current.target.GetType().GetField(currentCallingName, DefaultBindingFlags) 
-                ?? throw new ADException("Parse Error : Field");
+                current.target.GetType().GetField(currentCallingName, DefaultBindingFlags)
+                ?? throw new FieldException();
             currentTarget = data.GetValue(current.target);
             return currentTarget;
         }
@@ -265,6 +289,16 @@ namespace AD.Utility
         public static T CreateInstance<T>(this Type type)
         {
             return (T)Activator.CreateInstance(type);
+        }
+
+        public static object GetFieldByName(this object self, string fieldName)
+        {
+            return self.GetType().GetField(fieldName, DefaultBindingFlags).GetValue(self);
+        }
+
+        public static T GetFieldByName<T>(this object self, string fieldName)
+        {
+            return (T)self.GetType().GetField(fieldName, DefaultBindingFlags).GetValue(self);
         }
     }
 }
