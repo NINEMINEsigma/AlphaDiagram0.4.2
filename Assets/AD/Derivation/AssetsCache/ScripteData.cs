@@ -32,7 +32,7 @@ namespace AD.Experimental.EditorAsset.Cache
     /// <para>继承并重写Equals与GetHashCode以实现更加扩展性的功能</para>
     /// </summary>
     [Serializable]
-    public class CacheAssetsKey
+    public class CacheAssetsKey:IComparable<CacheAssetsKey> 
     {
         public CacheAssetsKey() { }
 
@@ -48,9 +48,19 @@ namespace AD.Experimental.EditorAsset.Cache
             return IdentifyID.Equals(obj);
         }
 
+        public bool Equals(string key)
+        {
+            return IdentifyID.Equals(key);
+        }
+
         public override int GetHashCode()
         {
             return IdentifyID.GetHashCode();
+        }
+
+        public int CompareTo(CacheAssetsKey other)
+        {
+            return this.IdentifyID.CompareTo(other.IdentifyID);
         }
     }
     /// <summary>
@@ -137,10 +147,15 @@ namespace AD.Experimental.EditorAsset.Cache
         }
 
         [Serializable]
-        public class SourcePair
+        public class SourcePair:IComparable<SourcePair>
         {
             public Key key;
             public _AbstractScriptableObject data;
+
+            public int CompareTo(SourcePair other)
+            {
+                return key.CompareTo(other.key);
+            }
         }
 
         [SerializeField] List<SourcePair> AssetsData = new();
@@ -253,7 +268,6 @@ namespace AD.Experimental.EditorAsset.Cache
             AssetsData.Remove(AssetsData.Find(_K => _K.key.Equals(key)));
             Keys.Remove(key);
         }
-
     }
 
 }

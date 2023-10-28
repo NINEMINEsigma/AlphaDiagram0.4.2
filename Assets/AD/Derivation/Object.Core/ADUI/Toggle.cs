@@ -3,6 +3,7 @@ using AD.BASE;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -10,7 +11,7 @@ namespace AD.UI
 {
     [Serializable]
     [AddComponentMenu("UI/AD/Toggle", 100)]
-    public class Toggle : AD.UI.ADUI
+    public class Toggle : AD.UI.ADUI,IBoolButton
     {
         public class UnRegisterInfo
         {
@@ -44,23 +45,26 @@ namespace AD.UI
         public UnityEngine.UI.Image mark;
         public TMP_Text title;
 
-        private BindProperty<bool> _IsCheck = new();
-        public bool IsCheck
+        public BindProperty<bool> BoolProperty = new();
+        public bool isOn
         {
-            get { return _IsCheck.Get(); }
-            private set
+            get { return BoolProperty.Get(); }
+            set
             {
-                _IsCheck.Set(value);
-                tab.gameObject.SetActive(!value);
-                mark.gameObject.SetActive(value);
-                actions.Invoke(value);
+                if (value != BoolProperty.Get())
+                {
+                    BoolProperty.Set(value);
+                    tab.gameObject.SetActive(!value);
+                    mark.gameObject.SetActive(value);
+                    actions.Invoke(value);
+                }
             }
         }
 
         public void Bind(BindProperty<bool> property)
         {
-            _IsCheck = property;
-            IsCheck = _IsCheck.Get();
+            BoolProperty = property;
+            isOn = BoolProperty.Get();
         }
 
         private RegisterInfo __unregisterInfo;
@@ -80,7 +84,7 @@ namespace AD.UI
             __unregisterInfo = ADGlobalSystem.AddListener(Mouse.current.leftButton, () =>
             {
                 if (!Selected) return;
-                IsCheck = !IsCheck;
+                isOn = !isOn;
             }, PressType.ThisFramePressed); 
         }
         protected void OnDestroy()
@@ -91,7 +95,7 @@ namespace AD.UI
 
         public void Init()
         {
-            _IsCheck.Set(false);
+            BoolProperty.Set(false);
             tab.gameObject.SetActive(true);
             mark.gameObject.SetActive(false);
         }
@@ -140,6 +144,16 @@ namespace AD.UI
         {
             this.title.text = title;
             return this; 
+        }
+
+        IBoolButton IBoolButton.AddListener(UnityAction<bool> action)
+        {
+            return this.AddListener(action);
+        }
+
+        IBoolButton IBoolButton.RemoveListener(UnityAction<bool> action)
+        {
+            return this.RemoveListener(action);
         }
 
         #endregion

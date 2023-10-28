@@ -1,8 +1,10 @@
 using System;
 using AD.BASE;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -108,24 +110,27 @@ namespace AD.UI
             IsClick = !IsClick;
         }
 
-        public void AddListener(UnityEngine.Events.UnityAction action, PressType type = PressType.ThisFramePressed)
+        public Button AddListener(UnityEngine.Events.UnityAction action, PressType type = PressType.ThisFramePressed)
         {
             if (type == PressType.ThisFramePressed) OnClick.AddListener(action);
             else if (type == PressType.ThisFrameReleased) OnRelease.AddListener(action);
             else AD.ADGlobalSystem.AddMessage("You try to add worry listener");
+            return this;
         }
 
-        public void RemoveListener(UnityEngine.Events.UnityAction action, PressType type = PressType.ThisFramePressed)
+        public Button RemoveListener(UnityEngine.Events.UnityAction action, PressType type = PressType.ThisFramePressed)
         {
             if (type == PressType.ThisFramePressed) OnClick.RemoveListener(action);
             else if (type == PressType.ThisFrameReleased) OnRelease.RemoveListener(action);
             else AD.ADGlobalSystem.AddMessage("You try to remove worry listener");
+            return this;
         }
 
-        public void RemoveAllListener(PressType type = PressType.ThisFramePressed)
+        public Button RemoveAllListeners(PressType type = PressType.ThisFramePressed)
         {
             if (type == PressType.ThisFramePressed) OnClick.RemoveAllListeners();
             else if (type == PressType.ThisFrameReleased) OnRelease.RemoveAllListeners();
+            return this;
         }
 
         public AD.UI.Button SetTitle(string title)
@@ -135,9 +140,9 @@ namespace AD.UI
             return this;
         }
 
-        void IButton.SetTitle(string title)
+        IButton IButton.SetTitle(string title)
         {
-            this.SetTitle(title);
+            return this.SetTitle(title);
         }
 
         public AD.UI.Button SetView(Sprite image)
@@ -153,5 +158,19 @@ namespace AD.UI
             return this;
         }
 
+        IButton IButton.AddListener(UnityAction action)
+        {
+            return AddListener(action);
+        }
+
+        IButton IButton.RemoveListener(UnityAction action)
+        {
+            return RemoveListener(action);
+        }
+
+        IButton IButton.RemoveAllListeners()
+        {
+            return RemoveAllListeners();
+        }
     }
 }

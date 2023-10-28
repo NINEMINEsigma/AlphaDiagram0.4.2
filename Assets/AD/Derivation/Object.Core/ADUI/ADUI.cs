@@ -13,7 +13,7 @@ namespace AD.UI
         void InitializeContext();
     }
 
-    public interface IADUI: ICanInitializeBehaviourContext
+    public interface IADUI : ICanInitializeBehaviourContext
     {
         IADUI Obtain(int serialNumber);
         IADUI Obtain(string elementName);
@@ -145,8 +145,28 @@ namespace AD.UI
         }
     }
 
-    public interface IButton
+    public interface IButton : IADUI
     {
-        void SetTitle(string title);
+        IButton SetTitle(string title);
+        IButton AddListener(UnityAction action);
+        IButton RemoveListener(UnityAction action);
+        IButton RemoveAllListeners();
+    }
+
+    public interface IBoolButton : IADUI
+    {
+        bool isOn { get; set; }
+        IBoolButton AddListener(UnityAction<bool> action);
+        IBoolButton RemoveListener(UnityAction<bool> action);
+    }
+
+    public interface IDropdown : IADUI
+    {
+        void AddOption(params string[] texts);
+        void RemoveOption(params string[] texts);
+        void ClearOptions();
+        void Select(string option);
+        void AddListener(UnityAction<string> action);
+        void RemoveListener(UnityAction<string> action);
     }
 }

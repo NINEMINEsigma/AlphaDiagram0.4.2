@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dac8106700973d24bb89fe8d633b024a, type: 3}
-  m_Name: Button
+  m_Name: ModernUI - Button
   m_EditorClassIdentifier: 
-  BindKey: 
-  Perfab: {fileID: 0}
-  TypeName: Button
+  BindKey: ModernUI - Button
+  Prefab: {fileID: 6310133973486197292, guid: 880c48e944f1fd24ea22dbe33b3edb59, type: 3}
+  TypeName: ModernUIButton

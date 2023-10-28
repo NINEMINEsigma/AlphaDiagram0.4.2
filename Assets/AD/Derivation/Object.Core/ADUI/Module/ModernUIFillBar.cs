@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using AD.BASE;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,9 +22,11 @@ namespace AD.UI
         }
 
         // Content
+        private float lastPercent;
         [Range(0, 1)] public float currentPercent;
         public float minValue = 0;
         public float maxValue = 100;
+        public ADEvent<float> OnValueChange = new();
 
         public float value => (maxValue - minValue) * currentPercent + minValue;
         public float Value => (maxValue - minValue) * currentPercent + minValue;
@@ -40,6 +43,11 @@ namespace AD.UI
 
         public void LateUpdate()
         {
+            if (currentPercent == lastPercent) return;
+
+            lastPercent = currentPercent;
+            OnValueChange.Invoke(currentPercent);
+
             if (IsLockByScript) loadingBar.fillAmount = Mathf.Clamp(currentPercent, 0, 1);
             else currentPercent = loadingBar.fillAmount;
 

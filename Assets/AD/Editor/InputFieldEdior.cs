@@ -22,7 +22,7 @@ public class InputFieldEdior : ADUIEditor
         if (EditorGUI.EndChangeCheck()) that.text = str1;
 
         EditorGUI.BeginChangeCheck();
-        string str2 = EditorGUILayout.TextField("PlaceholderTexT", that.Placeholder.text);
+        string str2 = EditorGUILayout.TextField("PlaceholderText", that.Placeholder.text);
         if (EditorGUI.EndChangeCheck()) that.SetPlaceholderText(str2);
     }
 

@@ -9,10 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74138fe25a469764798740bd76d99c15, type: 3}
-  m_Name: Default Skin
+  m_Script: {fileID: 11500000, guid: dac8106700973d24bb89fe8d633b024a, type: 3}
+  m_Name: UI - Title
   m_EditorClassIdentifier: 
-  AssetsData:
-  - key:
-      IdentifyID: Button
-    data: {fileID: 11400000, guid: 41be93682c810234897329f13190d82b, type: 2}
+  BindKey: UI - Title
+  Prefab: {fileID: 6910788301896422409, guid: 252e5139f0d9baa449cdd64fcb84a8c7, type: 3}
+  TypeName: Text

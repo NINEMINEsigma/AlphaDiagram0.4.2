@@ -23,13 +23,13 @@ public class ToggleEdior : ADUIEditor
         tab = serializedObject.FindProperty("tab");
         mark = serializedObject.FindProperty("mark");
         title = serializedObject.FindProperty("title");
-        _IsCheck = serializedObject.FindProperty("_IsCheck");
+        _IsCheck = serializedObject.FindProperty("BoolProperty");
         actions = serializedObject.FindProperty("actions");
     }
 
     public override void OnContentGUI()
     {
-        OnNotChangeGUI(() => HorizontalBlockWithBox(() => EditorGUILayout.Toggle("IsCheck", that.IsCheck, customSkin.toggle)));
+        OnNotChangeGUI(() => HorizontalBlockWithBox(() => EditorGUILayout.Toggle("isOn", that.isOn, customSkin.toggle)));
 
         EditorGUILayout.PropertyField(actions);
 

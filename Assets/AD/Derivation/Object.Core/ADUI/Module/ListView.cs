@@ -79,7 +79,7 @@ namespace AD.UI
         {
             if (Prefab == null) return null;
             GameObject item  = Spawn(ListViewDefaultPerfabSpawnKey, Prefab.gameObject);
-            this[index++] = item;
+            this[index] = item;
             item.GetComponent<ListViewItem>().SortIndex = index++;
             return item.GetComponent<ListViewItem>().Init();
         }

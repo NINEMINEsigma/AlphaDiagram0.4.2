@@ -4,6 +4,7 @@ using AD.BASE;
 using AD.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace AD.Experimental.GameEditor
 {
@@ -75,9 +76,8 @@ namespace AD.Experimental.GameEditor
             {
                 foreach (var target in CurrentPropertiesEditors)
                 {
-                    RegisterPropertiesItem(target);
-                    target.OnSerialize();
-
+                    var rect = RegisterPropertiesItem(target);
+                    //target.OnSerialize();
                 }
                 EditorAssets.PropertiesListView.SortChilds();
             }
@@ -89,7 +89,12 @@ namespace AD.Experimental.GameEditor
             {
                 foreach (var target in CurrentPropertiesEditors)
                 {
-                    target.OnSerialize();
+                    if (target.IsDirty)
+                    {
+                        target.MatchItem.Init();
+                        target.OnSerialize();
+                        target.IsDirty = false;
+                    }
                 }
                 EditorAssets.PropertiesListView.SortChilds();
             }

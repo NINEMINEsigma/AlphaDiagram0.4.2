@@ -23,7 +23,7 @@ namespace AD.UI
 
         public AD.UI.InputField RGBAText;
 
-        private BindProperty<Color> _ColorProperty;
+        private BindProperty<Color> _ColorProperty = new();
         public BindProperty<Color> ColorProperty
         {
             get => _ColorProperty;
@@ -38,6 +38,17 @@ namespace AD.UI
                 InitColorPropertyAndShow(value.Get());
                 CP.SetColorPanel(value.Get());
                 sliderCA.value = value.Get().a;
+            }
+        }
+        public Color ColorValue
+        {
+            get => _ColorProperty.Get();
+            set
+            {
+                _ColorProperty.Set(value);
+                InitColorPropertyAndShow(value);
+                CP.SetColorPanel(value);
+                sliderCA.value = value.a;
             }
         }
 

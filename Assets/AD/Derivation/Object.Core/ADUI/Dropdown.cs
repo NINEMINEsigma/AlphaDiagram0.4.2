@@ -8,7 +8,7 @@ using UnityEngine.Events;
 
 namespace AD.UI
 {
-    public class Dropdown : ADUI
+    public class Dropdown : ADUI, IDropdown
     {
         private TMP_Dropdown _source;
         public TMP_Dropdown source
@@ -28,21 +28,24 @@ namespace AD.UI
         protected void Start()
         {
             AD.UI.ADUI.Initialize(this);
-            source.onValueChanged.AddListener(T =>
-            {
-                if (options.Count == 0) return;
-                if (T > 0 && T < options.Count)
-                {
-                    CurrentSelectOption = options[T];
-                    OnSelect.Invoke(CurrentSelectOption);
-                }
-                else
-                {
-                    if (!options.Contains(CurrentSelectOption)) CurrentSelectOption = options[0];
-                    source.SetValueWithoutNotify(options.IndexOf(CurrentSelectOption));
-                }
-            });
+            source.onValueChanged.AddListener(SetOptionByIndex);
         }
+
+        private void SetOptionByIndex(int T)
+        {
+            if (options.Count == 0) return;
+            if (T > 0 && T < options.Count)
+            {
+                CurrentSelectOption = options[T];
+                OnSelect.Invoke(CurrentSelectOption);
+            }
+            else
+            {
+                if (!options.Contains(CurrentSelectOption)) CurrentSelectOption = options[0];
+                source.SetValueWithoutNotify(options.IndexOf(CurrentSelectOption));
+            }
+        }
+
         protected void OnDestroy()
         {
             AD.UI.ADUI.Destory(this);
@@ -50,6 +53,9 @@ namespace AD.UI
 
         public void Init()
         {
+            OnSelect.RemoveAllListeners();
+            options.Clear();
+            CurrentSelectOption = "Default";
         }
 
 #if UNITY_EDITOR
@@ -107,6 +113,14 @@ namespace AD.UI
         {
             options.Clear();
             source.ClearOptions();
+        }
+
+        public void Select(string option)
+        {
+            if(options.Contains(option))
+            {
+                SetOptionByIndex(options.IndexOf(option));
+            }
         }
     }
 }

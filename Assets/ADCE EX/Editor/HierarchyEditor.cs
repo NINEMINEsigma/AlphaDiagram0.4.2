@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
 using AD.Experimental.GameEditor;
+using AD.UI;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +20,10 @@ public class TestObject : AD.Experimental.GameEditor.ICanSerializeOnCustomEditor
         MatchHierarchyEditor = new TestSerializeHierarchyEditor(this);
         MatchPropertiesEditors.Add(new TestSerializePropertiesEditor1(this));
         MatchPropertiesEditors.Add(new TestSerializePropertiesEditor2(this));
+        color = Random.ColorHSV();
     }
+
+    public Color color;
 
     public void ClickOnLeft()
     {
@@ -62,14 +67,12 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
     public ICanSerializeOnCustomEditor MatchTarget { get; private set; }
 
     public int SerializeIndex { get => 0; set => throw new ADException(); }
+    bool ISerializePropertiesEditor.IsDirty { get; set; } = false;
 
     public TestSerializePropertiesEditor1(TestObject target)
     {
         MatchTarget = target;
-        _Color.Set(Random.ColorHSV());
     }
-
-    BindProperty<Color> _Color = new();
 
     public void OnSerialize()
     {
@@ -77,6 +80,8 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
 
         MatchItem.SetTitle("Test 1");
 
+        PropertiesLayout.ModernUISwitch("Switch", true, "Test Switch", T => { });
+        PropertiesLayout.ColorPanel("Test", MatchTarget.As<TestObject>().color, "Test Color", T => MatchTarget.As<TestObject>().color = T);
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();
     }
@@ -89,6 +94,7 @@ public class TestSerializePropertiesEditor2 : ISerializePropertiesEditor
     public ICanSerializeOnCustomEditor MatchTarget { get; private set; }
 
     public int SerializeIndex { get => 200; set => throw new ADException(); }
+    bool ISerializePropertiesEditor.IsDirty { get; set; } = false;
     BindProperty<string> Property { get; set; } = new();
 
     public TestSerializePropertiesEditor2(TestObject target)

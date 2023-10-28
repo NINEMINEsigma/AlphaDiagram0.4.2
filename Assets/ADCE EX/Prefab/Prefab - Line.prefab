@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7652141003288897395}
   - component: {fileID: 3690381504212167745}
   m_Layer: 5
-  m_Name: Perfab - Line
+  m_Name: Prefab - Line
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

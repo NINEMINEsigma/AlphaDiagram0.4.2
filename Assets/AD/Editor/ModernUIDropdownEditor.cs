@@ -27,6 +27,7 @@ public class ModernUIDropdownEditor : ADUIEditor
     SerializedProperty maxSelect;
     SerializedProperty title;
     SerializedProperty icon;
+    SerializedProperty OnSelect;
 
     protected override void OnEnable()
     {
@@ -49,6 +50,7 @@ public class ModernUIDropdownEditor : ADUIEditor
         maxSelect = serializedObject.FindProperty("maxSelect");
         title = serializedObject.FindProperty("title");
         icon = serializedObject.FindProperty("icon");
+        OnSelect = serializedObject.FindProperty("OnSelect");
     }
 
     public override void OnContentGUI()
@@ -200,5 +202,7 @@ public class ModernUIDropdownEditor : ADUIEditor
         EditorGUILayout.PropertyField(animationType, new GUIContent(""));
 
         GUILayout.EndHorizontal();
+
+        EditorGUILayout.PropertyField(OnSelect);
     }
 }

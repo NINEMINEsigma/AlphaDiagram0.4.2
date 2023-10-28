@@ -1,13 +1,15 @@
 using System.Collections.Generic;
+using System.Linq;
 using AD.BASE;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace AD.UI
 {
-    public class ModernUIDropdown : PropertyModule
+    public class ModernUIDropdown : PropertyModule, IDropdown
     {
         public ModernUIDropdown()
         {
@@ -36,6 +38,7 @@ namespace AD.UI
         public bool isListItem = false;
         public int maxSelect = 1;
         public AnimationType animationType;
+        public ADEvent<string> OnSelect = new();
 
         // Items
         public List<Item> dropdownItems = new();
@@ -155,7 +158,11 @@ namespace AD.UI
                             current.ToggleItem.graphic.CrossFadeAlpha(0, 0, true);
                         }
                     }
-                    else current.selectOrder = maxSelect;
+                    else
+                    {
+                        current.selectOrder = maxSelect;
+                        OnSelect.Invoke(current.itemName);
+                    }
                 }
             }
             else
@@ -315,5 +322,79 @@ namespace AD.UI
             icon.sprite = sprite;
         }
 
+        ToggleEvent SetItemEvent(int index)
+        {
+            if (index >= 0 && index < dropdownItems.Count)
+            {
+                return dropdownItems[index].toggleEvents;
+            }
+            else return null;
+        }
+
+        public void AddOption(params string[] texts)
+        {
+            foreach (var text in texts)
+            {
+                Item item = new()
+                {
+                    itemName = text
+                };
+                dropdownItems.Add(item);
+            }
+            SetupDropdown();
+        }
+        public void AddOption(params Item[] items)
+        {
+            foreach (var item in items)
+            {
+                dropdownItems.Add(item);
+            }
+            SetupDropdown();
+        }
+
+        public void RemoveOption(params string[] texts)
+        {
+            foreach (var text in texts)
+            {
+                dropdownItems.RemoveAll(T=>T.itemName == text);
+            }
+            SetupDropdown();
+        }
+        public void RemoveOption(params Item[] items)
+        {
+            foreach (var item in items)
+            {
+                dropdownItems.RemoveAll(T => T == item);
+            }
+            SetupDropdown();
+        }
+
+        public void ClearOptions()
+        {
+            dropdownItems.Clear();
+            SetupDropdown();
+        }
+
+        public void Select(string option)
+        {
+            var target = dropdownItems.FirstOrDefault(T => T.itemName == option);
+            if(target!=default)
+            {
+                target.ToggleItem.isOn = true;
+            }
+        }
+
+        public void AddListener(UnityAction<string> action)
+        {
+            OnSelect.AddListener(action);
+        }
+        public void RemoveListener(UnityAction<string> action)
+        {
+            OnSelect.RemoveListener(action);
+        }
+        public void RemoveAllListeners()
+        {
+            OnSelect.RemoveAllListeners();
+        }
     }
 }

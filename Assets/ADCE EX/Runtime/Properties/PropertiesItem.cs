@@ -13,7 +13,7 @@ namespace AD.Experimental.GameEditor
         public const float DefaultRectHightLevelSize = 30;
 
         [SerializeField] AD.UI.Toggle Lock_Tilie_Toggle;
-        [SerializeField] RectTransform SubPage;
+        public RectTransform SubPage;
         [SerializeField] RectTransform SubLinePerfab;
 
         private bool IsLock = false;
@@ -58,21 +58,27 @@ namespace AD.Experimental.GameEditor
             this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, DefaultHight);
         }
 
-        public void AddRectHightLevel(int level=1)
+        public void AddRectHightLevel(int level = 1)
         {
             Vector2 temp = this.transform.As<RectTransform>().sizeDelta;
-            this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultRectHightLevelSize* level);
+            this.transform.As<RectTransform>().sizeDelta = new Vector2(temp.x, temp.y + DefaultRectHightLevelSize * level);
         }
 
-        public RectTransform AddNewLevelLine(int line=1)
+        public RectTransform AddNewLevelLine(bool isNewLine, int line)
         {
+            if(!isNewLine)
+            Debug.Log(line);
             AddRectHightLevel(line);
-            Lines.Add(GameObject.Instantiate(SubLinePerfab.gameObject,SubPage));
+            if (isNewLine)
+            {
+                Lines.Add(GameObject.Instantiate(SubLinePerfab.gameObject, SubPage));
+                RectTransform temp = Lines[^1].GetComponent<RectTransform>();
+                temp.sizeDelta= new Vector2(temp.sizeDelta.x, 0);
+            }
             GameObject obj = Lines[^1];
             RectTransform result = obj.GetComponent<RectTransform>();
-            result.sizeDelta = new Vector2(result.sizeDelta.x, DefaultRectHightLevelSize*line);
+            result.sizeDelta = new Vector2(result.sizeDelta.x, result.sizeDelta.y + DefaultRectHightLevelSize * line);
             return result;
         }
-
     }
 }

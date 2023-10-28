@@ -32,7 +32,7 @@ namespace AD.Experimental.GameEditor
 
     public static class CustomEditorUtility
     {
-        public static HierarchyItem RegisterHierarchyItem(this ISerializeHierarchyEditor self,ISerializeHierarchyEditor target)
+        public static HierarchyItem RegisterHierarchyItem(this ISerializeHierarchyEditor self, ISerializeHierarchyEditor target)
         {
             HierarchyItem hierarchyItem = self.MatchItem.ListSubListView.GenerateItem() as HierarchyItem;
             target.MatchItem = hierarchyItem;
@@ -70,7 +70,7 @@ namespace AD.Experimental.GameEditor
             }
         }
 
-        public static void SetTitle(ISerializeHierarchyEditor editor,string title)
+        public static void SetTitle(ISerializeHierarchyEditor editor, string title)
         {
             editor.MatchItem.SetTitle(title);
         }
@@ -90,6 +90,7 @@ namespace AD.Experimental.GameEditor
             {
                 Architecture.GetController<Properties>().MatchTarget = cat.MatchEditor.MatchTarget;
                 Architecture.GetController<Properties>().ClearAndRefresh();
+
             }
         }
     }
@@ -108,14 +109,14 @@ namespace AD.Experimental.GameEditor
         int SerializeIndex { get; set; }
     }
 
-    public interface ISerializeHierarchyEditor: ICanSerialize
+    public interface ISerializeHierarchyEditor : ICanSerialize
     {
         HierarchyItem MatchItem { get; set; }
         ICanSerializeOnCustomEditor MatchTarget { get; }
         bool IsOpenListView { get; set; }
     }
 
-    public interface ICanSerializeOnCustomEditor 
+    public interface ICanSerializeOnCustomEditor
     {
         ISerializeHierarchyEditor MatchHierarchyEditor { get; set; }
         List<ISerializePropertiesEditor> MatchPropertiesEditors { get; set; }
@@ -130,5 +131,6 @@ namespace AD.Experimental.GameEditor
     {
         PropertiesItem MatchItem { get; set; }
         ICanSerializeOnCustomEditor MatchTarget { get; }
+        bool IsDirty { get; set; }
     }
 }

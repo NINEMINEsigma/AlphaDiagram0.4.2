@@ -1,4 +1,5 @@
 using System.Collections;
+using AD.BASE;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -59,8 +60,8 @@ namespace AD.UI
     {
         //[Header("Context")]
         public string buttonText = "Button";
-        public UnityEvent clickEvent;
-        public UnityEvent hoverEvent;
+        public ADEvent clickEvent;
+        public ADEvent hoverEvent;
         public AudioClip hoverSound;
         public AudioClip clickSound;
         [SerializeField] private UnityEngine.UI.Button _buttonVar;
@@ -148,9 +149,9 @@ namespace AD.UI
             return this;
         }
 
-        void IButton.SetTitle(string title)
+        IButton IButton.SetTitle(string title)
         {
-            this.SetTitle(title);
+            return this.SetTitle(title);
         }
 
         public enum AnimationSolution
@@ -293,6 +294,24 @@ namespace AD.UI
 
                 yield return null;
             }
+        }
+
+        public IButton AddListener(UnityAction action)
+        {
+            clickEvent.AddListener(action);
+            return this;
+        }
+
+        public IButton RemoveListener(UnityAction action)
+        {
+            clickEvent.RemoveListener(action);
+            return this;
+        }
+
+        public IButton RemoveAllListeners()
+        {
+            clickEvent.RemoveAllListeners();
+            return this;
         }
     }
 }
