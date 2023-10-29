@@ -10,7 +10,7 @@ using UnityEngine;
 public class TestObject : AD.Experimental.GameEditor.ICanSerializeOnCustomEditor
 {
     public ISerializeHierarchyEditor MatchHierarchyEditor { get; set; }
-    public List<ISerializePropertiesEditor> MatchPropertiesEditors { get; set; } = new();
+    public List<ISerializePropertiesEditor> MatchPropertiesEditors { get; set; }
     public ICanSerializeOnCustomEditor ParentTarget { get; set; }
 
     public int SerializeIndex { get; set; }
@@ -18,13 +18,21 @@ public class TestObject : AD.Experimental.GameEditor.ICanSerializeOnCustomEditor
     public TestObject()
     {
         MatchHierarchyEditor = new TestSerializeHierarchyEditor(this);
-        MatchPropertiesEditors.Add(new TestSerializePropertiesEditor1(this));
-        MatchPropertiesEditors.Add(new TestSerializePropertiesEditor2(this));
+        MatchPropertiesEditors = new()
+        {
+            new TestSerializePropertiesEditor1(this),
+            new TestSerializePropertiesEditor2(this),
+            new PropertiesBlock<TestObject>(this,"Test")
+        };
         color = Random.ColorHSV();
     }
 
+    [ADSerialize(layer: "test", index: 0, message: "testing")]
     public Color color;
+    [ADSerialize(layer: "test", index: 2, message: "testing")]
+    public bool key;
 
+    [ADActionButton(layer: "test", index: 1, message: "testing button")]
     public void ClickOnLeft()
     {
     }
@@ -80,7 +88,7 @@ public class TestSerializePropertiesEditor1 : ISerializePropertiesEditor
 
         MatchItem.SetTitle("Test 1");
 
-        PropertiesLayout.ModernUISwitch("Switch", true, "Test Switch", T => { });
+        PropertiesLayout.ModernUISwitch("Switch", MatchTarget.As<TestObject>().key, "Test Switch", T => MatchTarget.As<TestObject>().key = T);
         PropertiesLayout.ColorPanel("Test", MatchTarget.As<TestObject>().color, "Test Color", T => MatchTarget.As<TestObject>().color = T);
 
         AD.Experimental.GameEditor.PropertiesLayout.ApplyPropertiesLayout();

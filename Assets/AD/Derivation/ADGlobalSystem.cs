@@ -198,7 +198,7 @@ namespace AD
     
         [Space(20),Header("GlobalSystem")]
         public bool IsNeedExcepion = true;
-        public readonly uint MaxRecordItemCount = 10000;
+        public uint MaxRecordItemCount = 10000;
         public static bool IsKeepException => instance.IsNeedExcepion;
 
         public AD.UI.Button _Button;
@@ -213,6 +213,7 @@ namespace AD
         public AD.UI.ModernUIDropdown _ModernUIDropdown;
         public AD.UI.ModernUIFillBar _ModernUIFillBar;
         public AD.UI.ModernUIInputField _ModernUIInputField;
+        public AD.UI.ModernUISwitch _ModernUISwitch;
 
         public ViewController _Image;
         public ColorManager _ColorManager;

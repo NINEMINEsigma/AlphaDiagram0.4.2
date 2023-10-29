@@ -66,8 +66,6 @@ namespace AD.Experimental.GameEditor
 
         public RectTransform AddNewLevelLine(bool isNewLine, int line)
         {
-            if(!isNewLine)
-            Debug.Log(line);
             AddRectHightLevel(line);
             if (isNewLine)
             {

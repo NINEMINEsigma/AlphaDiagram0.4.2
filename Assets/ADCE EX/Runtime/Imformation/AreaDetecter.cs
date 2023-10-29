@@ -8,6 +8,15 @@ namespace AD.Experimental.GameEditor
 {
     public class AreaDetecter : ADUI
     {
+        private void Start()
+        {
+            ADUI.Initialize(this);
+        }
+        private void OnDestroy()
+        {
+            ADUI.Destroy(this);
+        }
+
         public string Message = "";
 
         public override void OnPointerEnter(PointerEventData eventData)

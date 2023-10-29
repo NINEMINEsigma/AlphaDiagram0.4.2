@@ -72,6 +72,10 @@ namespace AD.UI
             string G = Convert.ToString((int)(256 * getColor.g), 16);
             string B = Convert.ToString((int)(256 * getColor.b), 16);
             string A = Convert.ToString((int)(256 * getColor.a), 16);
+            if (R == "100") R = "ff";
+            if (G == "100") G = "ff";
+            if (B == "100") B = "ff";
+            if (A == "100") A = "ff";
             if (RGBAText != null) RGBAText.SetText(R + G + B + A);
         }
 
