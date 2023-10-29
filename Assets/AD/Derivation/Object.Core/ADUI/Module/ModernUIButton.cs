@@ -151,7 +151,9 @@ namespace AD.UI
 
         IButton IButton.SetTitle(string title)
         {
-            return this.SetTitle(title);
+            buttonText = title;
+            UpdateUI();
+            return this;
         }
 
         public enum AnimationSolution

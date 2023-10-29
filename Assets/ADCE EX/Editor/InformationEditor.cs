@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using AD.Experimental.GameEditor;
@@ -17,6 +15,9 @@ public class InformationEditor : AbstractCustomADEditor
     SerializedProperty TaskViewItemPerfab;
     SerializedProperty SinglePanelPerfab;
     SerializedProperty SinglePanelLinePerfab;
+    SerializedProperty EnterMessagePanelTigger;
+    SerializedProperty MessageInputField;
+    SerializedProperty ExitMessagePanelTigger;
 
     protected override void OnEnable()
     {
@@ -32,6 +33,9 @@ public class InformationEditor : AbstractCustomADEditor
         TaskViewItemPerfab = serializedObject.FindProperty("TaskViewItemPerfab");
         SinglePanelPerfab = serializedObject.FindProperty("SinglePanelPerfab");
         SinglePanelLinePerfab = serializedObject.FindProperty("SinglePanelLinePerfab");
+        EnterMessagePanelTigger = serializedObject.FindProperty("EnterMessagePanelTigger");
+        MessageInputField = serializedObject.FindProperty("MessageInputField");
+        ExitMessagePanelTigger = serializedObject.FindProperty("ExitMessagePanelTigger");
     }
 
     public override void OnContentGUI()
@@ -50,6 +54,9 @@ public class InformationEditor : AbstractCustomADEditor
         EditorGUILayout.PropertyField(TaskViewItemPerfab);
         EditorGUILayout.PropertyField(SinglePanelPerfab);
         EditorGUILayout.PropertyField(SinglePanelLinePerfab);
+        EditorGUILayout.PropertyField(EnterMessagePanelTigger);
+        EditorGUILayout.PropertyField(MessageInputField);
+        EditorGUILayout.PropertyField(ExitMessagePanelTigger);
     }
 
     public override void OnSettingsGUI()

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using AD.BASE;
+using AD.UI;
 using UnityEngine;
 
 namespace AD.Experimental.GameEditor
@@ -183,10 +184,25 @@ namespace AD.Experimental.GameEditor
         [SerializeField] TaskViewItem TaskViewItemPerfab;
         [SerializeField] SinglePanel SinglePanelPerfab;
         [SerializeField] GameObject SinglePanelLinePerfab;
+        [SerializeField] Button EnterMessagePanelTigger;
+        [SerializeField] ModernUIInputField MessageInputField;
+        [SerializeField] UnityEngine.UI.Button ExitMessagePanelTigger;
 
         private void Start()
         {
             GameEditorApp.instance.RegisterController(this);
+            EnterMessagePanelTigger.AddListener(() =>
+            {
+                MessageInputField.gameObject.SetActive(true);
+                ExitMessagePanelTigger.gameObject.SetActive(true);
+            });
+            MessageInputField.gameObject.SetActive(false);
+            ExitMessagePanelTigger.gameObject.SetActive(false);
+            ExitMessagePanelTigger.onClick.AddListener(() =>
+            {
+                MessageInputField.gameObject.SetActive(false);
+                ExitMessagePanelTigger.gameObject.SetActive(false);
+            });
         }
 
         public override void Init()
@@ -223,12 +239,14 @@ namespace AD.Experimental.GameEditor
         {
             SetLeft(message);
             LeftText.source.color = Color.yellow;
+            MessageInputField.text = MessageInputField.text + "\n" + message;
         }
 
         public void Error(string message)
         {
             SetLeft(message);
             LeftText.source.color = Color.red;
+            MessageInputField.text = MessageInputField.text + "\n" + message;
         }
 
         public void Version(string version)

@@ -1,14 +1,11 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 using AD.Utility;
 using System.Reflection;
 using System.Linq;
 using static AD.Utility.ReflectionExtension;
-using System.Collections.ObjectModel;
-using System.Xml.Linq;
+using Unity.VisualScripting;
 
 namespace AD.Experimental.GameEditor
 {
@@ -67,8 +64,12 @@ namespace AD.Experimental.GameEditor
                 {
                     if (cad.AttributeType == CanSerialize)
                     {
-                        var cat = fields[T] = new();
-                        SetupEntry(cat, cad.NamedArguments);
+                        var cat = new ADSerializeEntry();
+                        if (SetupEntry(cat, cad.NamedArguments))
+                        {
+                            fields[cat] = T;
+                            maxLine.Add(cat);
+                        }
                         break;
                     }
                 }
@@ -80,8 +81,12 @@ namespace AD.Experimental.GameEditor
                 {
                     if (cad.AttributeType == CanSerialize)
                     {
-                        var cat = propertys[T] = new();
-                        SetupEntry(cat, cad.NamedArguments);
+                        var cat = new ADSerializeEntry();
+                        if (SetupEntry(cat, cad.NamedArguments))
+                        {
+                            propertys[cat] = T;
+                            maxLine.Add(cat);
+                        }
                         break;
                     }
                 }
@@ -93,23 +98,32 @@ namespace AD.Experimental.GameEditor
                 {
                     if (cad.AttributeType == CanSetupAction)
                     {
-                        var cat = methods[T] = new();
-                        SetupEntry(cat, cad.NamedArguments);
+                        var cat = new ADSerializeEntry();
+                        if (SetupEntry(cat, cad.NamedArguments))
+                        {
+                            methods[cat] = T;
+                            maxLine.Add(cat);
+                        }
                         break;
                     }
                 }
                 return true;
             });
 
-            static void SetupEntry(ADSerializeEntry cat, IList<CustomAttributeNamedArgument> temp_catas)
+            maxLine.Sort((T, P) => T.index.CompareTo(P.index));
+
+            bool SetupEntry(ADSerializeEntry cat, IList<CustomAttributeNamedArgument> temp_catas)
             {
+                bool isTure = false;
                 foreach (var cata in temp_catas)
                 {
                     switch (cata.MemberName)
                     {
-                        case "LayerTitle":
+                        case "layer":
                             {
                                 cat.layer = (string)cata.TypedValue.Value;
+                                if (cat.layer != layer) return false;
+                                else isTure = true;
                             }
                             break;
                         case "index":
@@ -122,18 +136,14 @@ namespace AD.Experimental.GameEditor
                                 cat.message = (string)cata.TypedValue.Value;
                             }
                             break;
-                        case "style":
+                        case "methodName":
                             {
-                                cat.style = (string)cata.TypedValue.Value;
-                            }
-                            break;
-                        case "isDefaultStyle":
-                            {
-                                cat.isDefaultStyle = (bool)cata.TypedValue.Value;
+                                cat.methodName = (string)cata.TypedValue.Value;
                             }
                             break;
                     }
                 }
+                return isTure;
             }
         }
 
@@ -142,30 +152,13 @@ namespace AD.Experimental.GameEditor
             public string layer;
             public int index;
             public string message;
-            public string style;
-            public bool isDefaultStyle = true;
-
-            public ADSerializeEntry()
-            {
-            }
-
-            public ADSerializeEntry(string layer,
-                                    int index,
-                                    string message,
-                                    string style,
-                                    bool isDefaultStyle)
-            {
-                this.layer = layer;
-                this.index = index;
-                this.message = message;
-                this.style = style;
-                this.isDefaultStyle = isDefaultStyle;
-            }
+            public string methodName;
         }
 
-        private readonly Dictionary<FieldInfo, ADSerializeEntry> fields = new();
-        private readonly Dictionary<PropertyInfo, ADSerializeEntry> propertys = new();
-        private readonly Dictionary<MethodInfo, ADSerializeEntry> methods = new();
+        private readonly Dictionary<ADSerializeEntry, FieldInfo> fields = new();
+        private readonly Dictionary<ADSerializeEntry, PropertyInfo> propertys = new();
+        private readonly Dictionary<ADSerializeEntry, MethodInfo> methods = new();
+        private readonly List<ADSerializeEntry> maxLine = new();
 
         protected readonly T that;
 
@@ -190,8 +183,12 @@ namespace AD.Experimental.GameEditor
 
         protected virtual void HowSerialize()
         {
-            if (true == true)
-                Debug.Log("X");
+            foreach (var item in maxLine)
+            {
+                if (fields.TryGetValue(item, out var field)) DoGUI_Field(item, field);
+                else if (propertys.TryGetValue(item, out var _proerty)) DoGUI_Property(item, _proerty);
+                else if (methods.TryGetValue(item, out var method)) PropertiesLayout.ModernUIButton(item.methodName, item.message, () => method.Invoke(that, null));
+            }
         }
 
         public static List<FieldInfo> GetSerializableFields(Type type,
@@ -350,6 +347,667 @@ namespace AD.Experimental.GameEditor
             return serializableMethods;
         }
 
+        private void DoGUI_Field(ADSerializeEntry entry, FieldInfo field)
+        {
+            Type type = field.FieldType;
+            if (type == typeof(bool))
+            {
+                PropertiesLayout.ModernUISwitch(field.Name, (bool)field.GetValue(that), entry.message, T => field.SetValue(that, T));
+            }
+            else if (type == typeof(char))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((char)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    field.SetValue(that, T[0]);
+                    cat.SetTextWithoutNotify(T[..1]);
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(double))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((double)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (double.TryParse(T, out double value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((double)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(float))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((float)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (float.TryParse(T, out float value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((float)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(int))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((int)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (int.TryParse(T, out int value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((int)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(uint))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((uint)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (uint.TryParse(T, out uint value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((uint)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(long))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((long)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (long.TryParse(T, out long value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((long)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(ulong))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((ulong)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (ulong.TryParse(T, out ulong value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((ulong)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(short))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((short)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (short.TryParse(T, out short value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((short)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(ushort))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name + "(unsigh integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((ushort)field.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (ushort.TryParse(T, out ushort value))
+                    {
+                        field.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((ushort)field.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(string))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name, entry.message);
+                var cat = PropertiesLayout.InputField((string)field.GetValue(that), entry.message);
+                cat.AddListener(T =>
+                {
+                    field.SetValue(that, T);
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(Vector2))
+            {
+                PropertiesLayout.Label(field.Name, entry.message);
+                var value = (Vector2)field.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector2)field.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector2)field.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+
+            }
+            else if (type == typeof(Vector3))
+            {
+                PropertiesLayout.Label(field.Name, entry.message);
+                var value = (Vector3)field.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector3)field.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector3)field.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+                catZ.AddListener(T =>
+                {
+                    var value = (Vector3)field.GetValue(that);
+                    if (float.TryParse(T, out float nz))
+                    {
+                        value.z = nz;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.z.ToString());
+                });
+            }
+            else if (type == typeof(Vector4))
+            {
+                PropertiesLayout.Label(field.Name, entry.message);
+                var value = (Vector4)field.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+                PropertiesLayout.BeginHorizontal();
+                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector4)field.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector4)field.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+                catZ.AddListener(T =>
+                {
+                    var value = (Vector4)field.GetValue(that);
+                    if (float.TryParse(T, out float nz))
+                    {
+                        value.z = nz;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.z.ToString());
+                });
+                catW.AddListener(T =>
+                {
+                    var value = (Vector4)field.GetValue(that);
+                    if (float.TryParse(T, out float nw))
+                    {
+                        value.w = nw;
+                        field.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.w.ToString());
+                });
+            }
+            else if (type == typeof(Color))
+            {
+                PropertiesLayout.ColorPanel(field.Name, (Color)field.GetValue(that), entry.message, T =>
+                {
+                    field.SetValue(that, T);
+                });
+            }
+            else if (type == typeof(Texture2D))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(field.Name, entry.message);
+                PropertiesLayout.RawImage((Texture2D)field.GetValue(that), entry.message);
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(Sprite))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Image(field.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)field.GetValue(that) };
+                PropertiesLayout.EndHorizontal();
+            }
+            else DoGUI_Field_Extension(entry, field);
+        }
+
+        private void DoGUI_Property(ADSerializeEntry entry, PropertyInfo property)
+        {
+            Type type = property.PropertyType;
+            if (type == typeof(bool))
+            {
+                PropertiesLayout.ModernUISwitch(property.Name, (bool)property.GetValue(that), entry.message, T => property.SetValue(that, T));
+            }
+            else if (type == typeof(char))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((char)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    property.SetValue(that, T[0]);
+                    cat.SetTextWithoutNotify(T[..1]);
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(double))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((double)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (double.TryParse(T, out double value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((double)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(float))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name, entry.message);
+                var cat = PropertiesLayout.InputField(((float)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (float.TryParse(T, out float value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((float)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(int))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((int)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (int.TryParse(T, out int value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((int)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(uint))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((uint)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (uint.TryParse(T, out uint value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((uint)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(long))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((long)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (long.TryParse(T, out long value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((long)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(ulong))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((ulong)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (ulong.TryParse(T, out ulong value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((ulong)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(short))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((short)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (short.TryParse(T, out short value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((short)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(ushort))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name + "(unsigh integer)", entry.message);
+                var cat = PropertiesLayout.InputField(((ushort)property.GetValue(that)).ToString(), entry.message);
+                cat.AddListener(T =>
+                {
+                    if (ushort.TryParse(T, out ushort value))
+                    {
+                        property.SetValue(that, value);
+                    }
+                    else
+                    {
+                        cat.SetTextWithoutNotify(((ushort)property.GetValue(that)).ToString());
+                    }
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(string))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name, entry.message);
+                var cat = PropertiesLayout.InputField((string)property.GetValue(that), entry.message);
+                cat.AddListener(T =>
+                {
+                    property.SetValue(that, T);
+                });
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(Vector2))
+            {
+                PropertiesLayout.Label(property.Name, entry.message);
+                var value = (Vector2)property.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector2)property.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector2)property.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+
+            }
+            else if (type == typeof(Vector3))
+            {
+                PropertiesLayout.Label(property.Name, entry.message);
+                var value = (Vector3)property.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector3)property.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector3)property.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+                catZ.AddListener(T =>
+                {
+                    var value = (Vector3)property.GetValue(that);
+                    if (float.TryParse(T, out float nz))
+                    {
+                        value.z = nz;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.z.ToString());
+                });
+            }
+            else if (type == typeof(Vector4))
+            {
+                PropertiesLayout.Label(property.Name, entry.message);
+                var value = (Vector4)property.GetValue(that);
+
+                PropertiesLayout.BeginHorizontal();
+                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+                PropertiesLayout.BeginHorizontal();
+                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
+                PropertiesLayout.EndHorizontal();
+
+                catX.AddListener(T =>
+                {
+                    var value = (Vector4)property.GetValue(that);
+                    if (float.TryParse(T, out float nx))
+                    {
+                        value.x = nx;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.x.ToString());
+                });
+                catY.AddListener(T =>
+                {
+                    var value = (Vector4)property.GetValue(that);
+                    if (float.TryParse(T, out float ny))
+                    {
+                        value.y = ny;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.y.ToString());
+                });
+                catZ.AddListener(T =>
+                {
+                    var value = (Vector4)property.GetValue(that);
+                    if (float.TryParse(T, out float nz))
+                    {
+                        value.z = nz;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.z.ToString());
+                });
+                catW.AddListener(T =>
+                {
+                    var value = (Vector4)property.GetValue(that);
+                    if (float.TryParse(T, out float nw))
+                    {
+                        value.w = nw;
+                        property.SetValue(that, value);
+                    }
+                    else catX.SetTextWithoutNotify(value.w.ToString());
+                });
+            }
+            else if (type == typeof(Color))
+            {
+                PropertiesLayout.ColorPanel(property.Name, (Color)property.GetValue(that), entry.message, T =>
+                {
+                    property.SetValue(that, T);
+                });
+            }
+            else if (type == typeof(Texture2D))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Label(property.Name, entry.message);
+                PropertiesLayout.RawImage((Texture2D)property.GetValue(that), entry.message);
+                PropertiesLayout.EndHorizontal();
+            }
+            else if (type == typeof(Sprite))
+            {
+                PropertiesLayout.BeginHorizontal();
+                PropertiesLayout.Image(property.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)property.GetValue(that) };
+                PropertiesLayout.EndHorizontal();
+            }
+            else DoGUI_Property_Extension(entry, property);
+        }
+
+        protected virtual void DoGUI_Field_Extension(ADSerializeEntry entry, FieldInfo field)
+        {
+            Debug.LogWarning("Cannt Generate This Type's UIComponent By Auto");
+        }
+        protected virtual void DoGUI_Property_Extension(ADSerializeEntry entry, PropertyInfo property)
+        {
+            Debug.LogWarning("Cannt Generate This Type's UIComponent By Auto");
+        }
+
     }
 
     [System.AttributeUsage(AttributeTargets.Property | AttributeTargets.Field, Inherited = true, AllowMultiple = true)]
@@ -358,24 +1016,15 @@ namespace AD.Experimental.GameEditor
         public string layer;
         public int index;
         public string message;
-        public string style;
-        public bool isDefaultStyle = true;
 
-        public ADSerializeAttribute(string layer, int index, string message, string style)
-        {
-            this.layer = layer;
-            this.index = index;
-            this.message = message;
-            this.style = style;
-            this.isDefaultStyle = false;
-        }
+        /*
         public ADSerializeAttribute(string layer, int index, string message)
         {
             this.layer = layer;
             this.index = index;
             this.message = message;
-            this.isDefaultStyle = true;
         }
+        */
     }
 
     [System.AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = true)]
@@ -384,24 +1033,17 @@ namespace AD.Experimental.GameEditor
         public string layer;
         public int index;
         public string message;
-        public string style;
-        public bool isDefaultStyle = true;
+        public string methodName;
 
-        public ADActionButtonAttribute(string layer, int index, string message, string style)
+        /*
+        public ADActionButtonAttribute(string layer, int index, string message, string methodName)
         {
             this.layer = layer;
             this.index = index;
             this.message = message;
-            this.style = style;
-            this.isDefaultStyle = false;
+            this.methodName = methodName;
         }
-        public ADActionButtonAttribute(string layer, int index, string message)
-        {
-            this.layer = layer;
-            this.index = index;
-            this.message = message;
-            this.isDefaultStyle = true;
-        }
+        */
     }
 
 }

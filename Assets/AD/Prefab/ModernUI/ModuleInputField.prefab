@@ -382,6 +382,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Selected: 0
   ElementArea: InputField
+  Placeholder: {fileID: 3241788778710343315}
 --- !u!1 &3241788777676767016
 GameObject:
   m_ObjectHideFlags: 0

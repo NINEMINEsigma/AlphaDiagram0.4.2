@@ -120,7 +120,13 @@ namespace AD.UI
 
         public InputField SetText(string text)
         {
-            this.text = text;
+            this.text =text;
+            return this;
+        }
+
+        public InputField SetTextWithoutNotify(string text)
+        {
+            this.source.SetTextWithoutNotify(text);
             return this;
         }
 

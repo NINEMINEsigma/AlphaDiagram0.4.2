@@ -187,7 +187,7 @@ namespace AD.Experimental.GameEditor
             return Text(text, TextType.Text, message);
         }
 
-        public static InputField InputField(string text,string placeholderText, string message)
+        public static InputField InputField(string text, string placeholderText, string message)
         {
             var cat = GUIField("InputField(UI)", message).As<InputField>().SetText(text);
             cat.SetPlaceholderText(placeholderText);

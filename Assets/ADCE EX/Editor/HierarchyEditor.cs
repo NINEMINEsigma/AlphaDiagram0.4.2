@@ -20,21 +20,24 @@ public class TestObject : AD.Experimental.GameEditor.ICanSerializeOnCustomEditor
         MatchHierarchyEditor = new TestSerializeHierarchyEditor(this);
         MatchPropertiesEditors = new()
         {
-            new TestSerializePropertiesEditor1(this),
+            //new TestSerializePropertiesEditor1(this),
             new TestSerializePropertiesEditor2(this),
-            new PropertiesBlock<TestObject>(this,"Test")
+            new PropertiesBlock<TestObject>(this,"test")
         };
         color = Random.ColorHSV();
     }
 
-    [ADSerialize(layer: "test", index: 0, message: "testing")]
+    [ADSerialize(layer = "test", index = 0, message = "color")]
     public Color color;
-    [ADSerialize(layer: "test", index: 2, message: "testing")]
+    [ADSerialize(layer = "test", index = 2, message = "key")]
     public bool key;
+    [ADSerialize(layer = "test", index = 3, message = "Test Vec4")]
+    public Vector4 vec4;
 
-    [ADActionButton(layer: "test", index: 1, message: "testing button")]
+    [ADActionButton(layer = "test", index = 1, message = "ClickOnLeft", methodName = "Click")]
     public void ClickOnLeft()
     {
+        Debug.Log("Click");
     }
 
     public void ClickOnRight()
