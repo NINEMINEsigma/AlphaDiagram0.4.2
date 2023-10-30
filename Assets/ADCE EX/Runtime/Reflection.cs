@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Linq;
 using static AD.Utility.ReflectionExtension;
 using Unity.VisualScripting;
+using UnityEngine.Events;
 
 namespace AD.Experimental.GameEditor
 {
@@ -352,325 +353,439 @@ namespace AD.Experimental.GameEditor
             Type type = field.FieldType;
             if (type == typeof(bool))
             {
-                PropertiesLayout.ModernUISwitch(field.Name, (bool)field.GetValue(that), entry.message, T => field.SetValue(that, T));
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                    PropertiesLayout.ModernUISwitch(field.Name, (bool)field.GetValue(that), entry.message, T => field.SetValue(that, T));
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(char))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((char)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    field.SetValue(that, T[0]);
-                    cat.SetTextWithoutNotify(T[..1]);
-                });
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((char)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
+                    {
+                        field.SetValue(that, T[0]);
+                        cat.SetTextWithoutNotify(T[..1]);
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(double))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((double)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (double.TryParse(T, out double value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((double)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((double)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (double.TryParse(T, out double value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((double)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(float))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((float)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (float.TryParse(T, out float value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((float)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((float)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (float.TryParse(T, out float value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((float)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(int))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((int)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (int.TryParse(T, out int value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((int)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((int)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (int.TryParse(T, out int value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((int)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(uint))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((uint)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (uint.TryParse(T, out uint value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((uint)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((uint)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (uint.TryParse(T, out uint value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((uint)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(long))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((long)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (long.TryParse(T, out long value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((long)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((long)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (long.TryParse(T, out long value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((long)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(ulong))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((ulong)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (ulong.TryParse(T, out ulong value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(unsigned integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((ulong)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((ulong)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (ulong.TryParse(T, out ulong value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((ulong)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(short))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((short)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (short.TryParse(T, out short value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((short)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((short)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (short.TryParse(T, out short value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((short)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(ushort))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name + "(unsigh integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((ushort)field.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (ushort.TryParse(T, out ushort value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name + "(unsigh integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((ushort)field.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        field.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((ushort)field.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (ushort.TryParse(T, out ushort value))
+                        {
+                            field.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((ushort)field.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(string))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name, entry.message);
-                var cat = PropertiesLayout.InputField((string)field.GetValue(that), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    field.SetValue(that, T);
-                });
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var cat = PropertiesLayout.InputField((string)field.GetValue(that), entry.message);
+                    cat.AddListener(T =>
+                    {
+                        field.SetValue(that, T);
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Vector2))
             {
-                PropertiesLayout.Label(field.Name, entry.message);
-                var value = (Vector2)field.GetValue(that);
-
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
-
-                catX.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
+                    PropertiesLayout.Label(field.Name, entry.message);
                     var value = (Vector2)field.GetValue(that);
-                    if (float.TryParse(T, out float nx))
+
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
+
+                    catX.AddListener(T =>
                     {
-                        value.x = nx;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
+                        var value = (Vector2)field.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
+                    {
+                        var value = (Vector2)field.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                }
+                else
                 {
-                    var value = (Vector2)field.GetValue(that);
-                    if (float.TryParse(T, out float ny))
-                    {
-                        value.y = ny;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
 
             }
             else if (type == typeof(Vector3))
             {
-                PropertiesLayout.Label(field.Name, entry.message);
-                var value = (Vector3)field.GetValue(that);
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var value = (Vector3)field.GetValue(that);
 
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
 
-                catX.AddListener(T =>
-                {
-                    var value = (Vector3)field.GetValue(that);
-                    if (float.TryParse(T, out float nx))
+                    catX.AddListener(T =>
                     {
-                        value.x = nx;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
-                {
-                    var value = (Vector3)field.GetValue(that);
-                    if (float.TryParse(T, out float ny))
+                        var value = (Vector3)field.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
                     {
-                        value.y = ny;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
-                catZ.AddListener(T =>
-                {
-                    var value = (Vector3)field.GetValue(that);
-                    if (float.TryParse(T, out float nz))
+                        var value = (Vector3)field.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                    catZ.AddListener(T =>
                     {
-                        value.z = nz;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.z.ToString());
-                });
+                        var value = (Vector3)field.GetValue(that);
+                        if (float.TryParse(T, out float nz))
+                        {
+                            value.z = nz;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.z.ToString());
+                    });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Vector4))
             {
-                PropertiesLayout.Label(field.Name, entry.message);
-                var value = (Vector4)field.GetValue(that);
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    var value = (Vector4)field.GetValue(that);
 
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
-                PropertiesLayout.BeginHorizontal();
-                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
-                var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                    var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
 
-                catX.AddListener(T =>
-                {
-                    var value = (Vector4)field.GetValue(that);
-                    if (float.TryParse(T, out float nx))
+                    catX.AddListener(T =>
                     {
-                        value.x = nx;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
-                {
-                    var value = (Vector4)field.GetValue(that);
-                    if (float.TryParse(T, out float ny))
+                        var value = (Vector4)field.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
                     {
-                        value.y = ny;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
-                catZ.AddListener(T =>
-                {
-                    var value = (Vector4)field.GetValue(that);
-                    if (float.TryParse(T, out float nz))
+                        var value = (Vector4)field.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                    catZ.AddListener(T =>
                     {
-                        value.z = nz;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.z.ToString());
-                });
-                catW.AddListener(T =>
-                {
-                    var value = (Vector4)field.GetValue(that);
-                    if (float.TryParse(T, out float nw))
+                        var value = (Vector4)field.GetValue(that);
+                        if (float.TryParse(T, out float nz))
+                        {
+                            value.z = nz;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.z.ToString());
+                    });
+                    catW.AddListener(T =>
                     {
-                        value.w = nw;
-                        field.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.w.ToString());
-                });
+                        var value = (Vector4)field.GetValue(that);
+                        if (float.TryParse(T, out float nw))
+                        {
+                            value.w = nw;
+                            field.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.w.ToString());
+                    });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Color))
             {
-                PropertiesLayout.ColorPanel(field.Name, (Color)field.GetValue(that), entry.message, T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.ColorPanel(field.Name, (Color)field.GetValue(that), entry.message, T =>
                 {
                     field.SetValue(that, T);
                 });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Texture2D))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(field.Name, entry.message);
-                PropertiesLayout.RawImage((Texture2D)field.GetValue(that), entry.message);
-                PropertiesLayout.EndHorizontal();
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(field.Name, entry.message);
+                    PropertiesLayout.RawImage((Texture2D)field.GetValue(that), entry.message);
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Sprite))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Image(field.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)field.GetValue(that) };
-                PropertiesLayout.EndHorizontal();
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Image(field.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)field.GetValue(that) };
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
-            else DoGUI_Field_Extension(entry, field);
+            else if (entry.methodName == ADSerializeAttribute.DefaultMethod) DoGUI_Field_Extension(entry, field);
+            else that.RunMethodByName(entry.methodName, bindings, null);
         }
 
         private void DoGUI_Property(ADSerializeEntry entry, PropertyInfo property)
@@ -678,325 +793,442 @@ namespace AD.Experimental.GameEditor
             Type type = property.PropertyType;
             if (type == typeof(bool))
             {
-                PropertiesLayout.ModernUISwitch(property.Name, (bool)property.GetValue(that), entry.message, T => property.SetValue(that, T));
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.ModernUISwitch(property.Name, (bool)property.GetValue(that), entry.message, T => property.SetValue(that, T));
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(char))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((char)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    property.SetValue(that, T[0]);
-                    cat.SetTextWithoutNotify(T[..1]);
-                });
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((char)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
+                    {
+                        property.SetValue(that, T[0]);
+                        cat.SetTextWithoutNotify(T[..1]);
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(double))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((double)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (double.TryParse(T, out double value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((double)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((double)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (double.TryParse(T, out double value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((double)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(float))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name, entry.message);
-                var cat = PropertiesLayout.InputField(((float)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (float.TryParse(T, out float value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var cat = PropertiesLayout.InputField(((float)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((float)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (float.TryParse(T, out float value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((float)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(int))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((int)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (int.TryParse(T, out int value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((int)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((int)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (int.TryParse(T, out int value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((int)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(uint))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((uint)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (uint.TryParse(T, out uint value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((uint)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((uint)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (uint.TryParse(T, out uint value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((uint)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(long))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((long)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (long.TryParse(T, out long value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((long)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((long)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (long.TryParse(T, out long value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((long)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(ulong))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((ulong)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (ulong.TryParse(T, out ulong value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(unsigned integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((ulong)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((ulong)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (ulong.TryParse(T, out ulong value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((ulong)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(short))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((short)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (short.TryParse(T, out short value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((short)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((short)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (short.TryParse(T, out short value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((short)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(ushort))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name + "(unsigh integer)", entry.message);
-                var cat = PropertiesLayout.InputField(((ushort)property.GetValue(that)).ToString(), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    if (ushort.TryParse(T, out ushort value))
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name + "(unsigh integer)", entry.message);
+                    var cat = PropertiesLayout.InputField(((ushort)property.GetValue(that)).ToString(), entry.message);
+                    cat.AddListener(T =>
                     {
-                        property.SetValue(that, value);
-                    }
-                    else
-                    {
-                        cat.SetTextWithoutNotify(((ushort)property.GetValue(that)).ToString());
-                    }
-                });
-                PropertiesLayout.EndHorizontal();
+                        if (ushort.TryParse(T, out ushort value))
+                        {
+                            property.SetValue(that, value);
+                        }
+                        else
+                        {
+                            cat.SetTextWithoutNotify(((ushort)property.GetValue(that)).ToString());
+                        }
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(string))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name, entry.message);
-                var cat = PropertiesLayout.InputField((string)property.GetValue(that), entry.message);
-                cat.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
-                    property.SetValue(that, T);
-                });
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var cat = PropertiesLayout.InputField((string)property.GetValue(that), entry.message);
+                    cat.AddListener(T =>
+                    {
+                        property.SetValue(that, T);
+                    });
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Vector2))
             {
-                PropertiesLayout.Label(property.Name, entry.message);
-                var value = (Vector2)property.GetValue(that);
-
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
-
-                catX.AddListener(T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
                 {
+                    PropertiesLayout.Label(property.Name, entry.message);
                     var value = (Vector2)property.GetValue(that);
-                    if (float.TryParse(T, out float nx))
-                    {
-                        value.x = nx;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
-                {
-                    var value = (Vector2)property.GetValue(that);
-                    if (float.TryParse(T, out float ny))
-                    {
-                        value.y = ny;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
 
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
+
+                    catX.AddListener(T =>
+                    {
+                        var value = (Vector2)property.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
+                    {
+                        var value = (Vector2)property.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Vector3))
             {
-                PropertiesLayout.Label(property.Name, entry.message);
-                var value = (Vector3)property.GetValue(that);
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var value = (Vector3)property.GetValue(that);
 
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
 
-                catX.AddListener(T =>
-                {
-                    var value = (Vector3)property.GetValue(that);
-                    if (float.TryParse(T, out float nx))
+                    catX.AddListener(T =>
                     {
-                        value.x = nx;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
-                {
-                    var value = (Vector3)property.GetValue(that);
-                    if (float.TryParse(T, out float ny))
+                        var value = (Vector3)property.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
                     {
-                        value.y = ny;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
-                catZ.AddListener(T =>
-                {
-                    var value = (Vector3)property.GetValue(that);
-                    if (float.TryParse(T, out float nz))
+                        var value = (Vector3)property.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                    catZ.AddListener(T =>
                     {
-                        value.z = nz;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.z.ToString());
-                });
+                        var value = (Vector3)property.GetValue(that);
+                        if (float.TryParse(T, out float nz))
+                        {
+                            value.z = nz;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.z.ToString());
+                    });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Vector4))
             {
-                PropertiesLayout.Label(property.Name, entry.message);
-                var value = (Vector4)property.GetValue(that);
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    var value = (Vector4)property.GetValue(that);
 
-                PropertiesLayout.BeginHorizontal();
-                var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
-                var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
-                PropertiesLayout.BeginHorizontal();
-                var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
-                var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
-                PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catX = PropertiesLayout.InputField(value.x.ToString(), entry.message);
+                    var catY = PropertiesLayout.InputField(value.y.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
+                    PropertiesLayout.BeginHorizontal();
+                    var catZ = PropertiesLayout.InputField(value.z.ToString(), entry.message);
+                    var catW = PropertiesLayout.InputField(value.w.ToString(), entry.message);
+                    PropertiesLayout.EndHorizontal();
 
-                catX.AddListener(T =>
-                {
-                    var value = (Vector4)property.GetValue(that);
-                    if (float.TryParse(T, out float nx))
+                    catX.AddListener(T =>
                     {
-                        value.x = nx;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.x.ToString());
-                });
-                catY.AddListener(T =>
-                {
-                    var value = (Vector4)property.GetValue(that);
-                    if (float.TryParse(T, out float ny))
+                        var value = (Vector4)property.GetValue(that);
+                        if (float.TryParse(T, out float nx))
+                        {
+                            value.x = nx;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.x.ToString());
+                    });
+                    catY.AddListener(T =>
                     {
-                        value.y = ny;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.y.ToString());
-                });
-                catZ.AddListener(T =>
-                {
-                    var value = (Vector4)property.GetValue(that);
-                    if (float.TryParse(T, out float nz))
+                        var value = (Vector4)property.GetValue(that);
+                        if (float.TryParse(T, out float ny))
+                        {
+                            value.y = ny;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.y.ToString());
+                    });
+                    catZ.AddListener(T =>
                     {
-                        value.z = nz;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.z.ToString());
-                });
-                catW.AddListener(T =>
-                {
-                    var value = (Vector4)property.GetValue(that);
-                    if (float.TryParse(T, out float nw))
+                        var value = (Vector4)property.GetValue(that);
+                        if (float.TryParse(T, out float nz))
+                        {
+                            value.z = nz;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.z.ToString());
+                    });
+                    catW.AddListener(T =>
                     {
-                        value.w = nw;
-                        property.SetValue(that, value);
-                    }
-                    else catX.SetTextWithoutNotify(value.w.ToString());
-                });
+                        var value = (Vector4)property.GetValue(that);
+                        if (float.TryParse(T, out float nw))
+                        {
+                            value.w = nw;
+                            property.SetValue(that, value);
+                        }
+                        else catX.SetTextWithoutNotify(value.w.ToString());
+                    });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Color))
             {
-                PropertiesLayout.ColorPanel(property.Name, (Color)property.GetValue(that), entry.message, T =>
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.ColorPanel(property.Name, (Color)property.GetValue(that), entry.message, T =>
                 {
                     property.SetValue(that, T);
                 });
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Texture2D))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Label(property.Name, entry.message);
-                PropertiesLayout.RawImage((Texture2D)property.GetValue(that), entry.message);
-                PropertiesLayout.EndHorizontal();
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.Label(property.Name, entry.message);
+                    PropertiesLayout.RawImage((Texture2D)property.GetValue(that), entry.message);
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
             else if (type == typeof(Sprite))
             {
-                PropertiesLayout.BeginHorizontal();
-                PropertiesLayout.Image(property.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)property.GetValue(that) };
-                PropertiesLayout.EndHorizontal();
+                if (entry.methodName == ADSerializeAttribute.DefaultMethod)
+                {
+                    PropertiesLayout.BeginHorizontal();
+                    PropertiesLayout.Image(property.Name, entry.message).CurrentImagePair = new() { SpriteSource = (Sprite)property.GetValue(that) };
+                    PropertiesLayout.EndHorizontal();
+                }
+                else
+                {
+                    that.RunMethodByName(entry.methodName, bindings, null);
+                }
             }
-            else DoGUI_Property_Extension(entry, property);
+            else if (entry.methodName == ADSerializeAttribute.DefaultMethod) DoGUI_Property_Extension(entry, property);
+            else that.RunMethodByName(entry.methodName, bindings, null);
         }
 
         protected virtual void DoGUI_Field_Extension(ADSerializeEntry entry, FieldInfo field)
@@ -1016,6 +1248,8 @@ namespace AD.Experimental.GameEditor
         public string layer;
         public int index;
         public string message;
+        public string methodName = DefaultMethod;
+        public const string DefaultMethod = "Default";
 
         /*
         public ADSerializeAttribute(string layer, int index, string message)

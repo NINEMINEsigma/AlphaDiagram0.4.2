@@ -317,6 +317,11 @@ namespace AD.Utility
             return (T)self.GetType().GetField(fieldName, flags).GetValue(self);
         }
 
+        public static object RunMethodByName(this object self, string methodName, BindingFlags flags, params object[] args)
+        {
+            return self.GetType().GetMethod(methodName, flags).Invoke(self, args);
+        }
+
         public static FieldInfo[] GetAllFields(this object self)
         {
             return self.GetType().GetFields(AllBindingFlags);
