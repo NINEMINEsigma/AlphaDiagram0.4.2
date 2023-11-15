@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using AD.Utility;
 using AD.Utility.Object;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace AD.UI
 {
@@ -701,10 +703,34 @@ namespace AD.UI
 
         #region Resource
 
-        /*public static AudioClip Load(ParticleSystemTriggerEventType )
+        public void LoadOnResource(string source, bool isCurrent = true)
         {
+            string finalPath = Application.dataPath + "/Resources/" + source;
+            StartCoroutine(LoadAudio(finalPath, isCurrent));
+        }
 
-        }*/
+        public void LoadOnUrl(string url, bool isCurrent = true)
+        {
+            StartCoroutine(LoadAudio(url, isCurrent));
+        }
+
+        public IEnumerator LoadAudio(string path, bool isCurrent)
+        {
+            UnityWebRequest request = UnityWebRequest.Get(path);
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                AudioClip audioClip = DownloadHandlerAudioClip.GetContent(request);
+                if (isCurrent && SourcePairs.Count > 0)
+                    CurrentClip = audioClip;
+                else
+                    SourcePairs.Add(new SourcePair() { CilpName = path, Clip = audioClip });
+                Refresh();
+            }
+            else
+                Debug.LogError("Failed To Load " + request.result.ToString());
+        }
 
         #endregion
 

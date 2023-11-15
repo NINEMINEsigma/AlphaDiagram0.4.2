@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Networking;
@@ -366,6 +367,80 @@ namespace AD.BASE
             Request.Dispose();
         }
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public class OpenFileName
+        {
+            public int structSize = 0;
+            public IntPtr dlgOwner = IntPtr.Zero;
+            public IntPtr instance = IntPtr.Zero;
+            public string filter = null;
+            public string customFilter = null;
+            public int maxCustFilter = 0;
+            public int filterIndex = 0;
+            public string file = null;
+            public int maxFile = 0;
+            public string fileTitle = null;
+            public int maxFileTitle = 0;
+            public string initialDir = null;
+            public string title = null;
+            public int flags = 0;
+            public short fileOffset = 0;
+            public short fileExtension = 0;
+            public string defExt = null;
+            public IntPtr custData = IntPtr.Zero;
+            public IntPtr hook = IntPtr.Zero;
+            public string templateName = null;
+            public IntPtr reservedPtr = IntPtr.Zero;
+            public int reservedInt = 0;
+            public int flagsEx = 0;
+        }
+
+        public class LocalDialog
+        {
+            [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
+            public static extern bool GetOpenFileName([In, Out] OpenFileName ofn);
+            public static bool GetOFN([In, Out] OpenFileName ofn)
+            {
+                return GetOpenFileName(ofn);
+            }
+
+            [DllImport("Comdlg32.dll", SetLastError = true, ThrowOnUnmappableChar = true, CharSet = CharSet.Auto)]
+            public static extern bool GetSaveFileName([In, Out] OpenFileName ofn);
+            public static bool GetSFN([In, Out] OpenFileName ofn)
+            {
+                return GetSaveFileName(ofn);
+            }
+        }
+
+        public static OpenFileName SelectFileOnSystem(string labelName, string subLabelName, params string[] fileArgs)
+        {
+            OpenFileName targetFile = new OpenFileName();
+            targetFile.structSize = Marshal.SizeOf(targetFile);
+            targetFile.filter = labelName + "(*" + subLabelName + ")\0";
+            for (int i = 0; i < fileArgs.Length - 1; i++)
+            {
+                targetFile.filter += "*." + fileArgs[i] + ";";
+            }
+            if (fileArgs.Length > 0) targetFile.filter += "*." + fileArgs[^1] + ";\0";
+            targetFile.file = new string(new char[256]);
+            targetFile.maxFile = targetFile.file.Length;
+            targetFile.fileTitle = new string(new char[64]);
+            targetFile.maxFileTitle = targetFile.fileTitle.Length;
+            targetFile.initialDir = Application.streamingAssetsPath.Replace('/', '\\');//默认路径
+            targetFile.title = "Select A Song";
+            targetFile.flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008;
+            return targetFile;
+        }
+
+        public static OpenFileName SelectFileOnSystem(UnityAction<string> action, string labelName, string subLabelName, params string[] fileArgs)
+        {
+            OpenFileName targetFile = SelectFileOnSystem(labelName,subLabelName,fileArgs);
+            if (LocalDialog.GetOpenFileName(targetFile) && targetFile.file != "")
+            {
+                action(targetFile.file);
+            }
+            return targetFile;
+        }
     }
 
     public interface ICanBreakpointResume

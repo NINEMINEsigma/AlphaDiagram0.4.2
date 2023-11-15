@@ -297,7 +297,7 @@ namespace AD.BASE
     //Diffusing Command
     public class Vibration : ADCommand
     {
-        private Vibration() { }
+        protected Vibration() { }
 
         public override void OnExecute()
         {

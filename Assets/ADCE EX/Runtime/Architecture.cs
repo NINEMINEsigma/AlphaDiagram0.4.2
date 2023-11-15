@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using AD.BASE;
 using AD.UI;
 
@@ -18,7 +19,7 @@ namespace AD.Experimental.GameEditor
 
         public override void Init()
         {
-
+            this.RegisterModel<TaskList>();
         }
 
         public HierarchyItem CurrentHierarchyItem;

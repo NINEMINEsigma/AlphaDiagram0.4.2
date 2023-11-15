@@ -317,7 +317,7 @@ namespace AD.UI
                 Refresh();
             }
             else
-                Debug.LogError("Failed To Load");
+                Debug.LogError("Failed To Load "+ request.result.ToString());
         }
 
         public void LoadByIo(string path, int width, int height, bool isCurrent = true)

@@ -85,22 +85,25 @@ namespace AD.Experimental.GameEditor
             throw new NotImplementedException();
         }
 
+        public TaskInfo RegisterTask(string taskName, int taskIndex, float taskPercent, Vector2 range, bool isInt)
+        {
+            TaskInfo task = new(taskName, taskIndex, taskPercent, range, isInt);
+            AddTask(task);
+            return task;
+        }
+
         public ADEvent<TaskInfo> AddTaskCallBack = new();
         public ADEvent<TaskInfo> RemoveTaskCallBack = new();
         public ADEvent<TaskInfo> CompleteTaskCallBack = new();
 
         public void AddTask(TaskInfo task)
         {
-            if (Current == null)
-            {
-                Current = task;
-            }
-            else
+            if (Current != null)
             {
                 Tasks.Add(task);
-                Tasks.Sort();
             }
             AddTaskCallBack.Invoke(task);
+            Update();
         }
 
         public void RemoveTask(TaskInfo task)
@@ -108,7 +111,9 @@ namespace AD.Experimental.GameEditor
             if (Current == task)
             {
                 if (Tasks.Count > 0)
+                {
                     Current = Tasks[0];
+                }
                 else Current = null;
             }
             else
@@ -117,6 +122,7 @@ namespace AD.Experimental.GameEditor
                 Tasks.Sort();
             }
             RemoveTaskCallBack.Invoke(task);
+            Update();
         }
 
         public void Update()
@@ -126,8 +132,8 @@ namespace AD.Experimental.GameEditor
             {
                 CompleteTaskCallBack.Invoke(Current);
                 RemoveTask(Current);
-                Update();
             }
+            else Architecture.GetController<Information>().Refresh();
         }
 
         public void Wait(TaskInfo task)
@@ -173,7 +179,7 @@ namespace AD.Experimental.GameEditor
         }
     }
 
-    public class Information : ADController
+    public class Information : ADController,AD.BASE.ICanMonitorCommand<TaskListRefresh>
     {
         [SerializeField] AD.UI.Text LeftText;
         [SerializeField] AD.UI.Text RightText;
@@ -207,9 +213,7 @@ namespace AD.Experimental.GameEditor
 
         public override void Init()
         {
-            TaskList _m_TaskList = new();
-            Architecture.UnRegister<TaskList>();
-            Architecture.RegisterModel(_m_TaskList);
+            var _m_TaskList = Architecture.GetModel<TaskList>();
             _m_TaskList.AddTaskCallBack.AddListener(T => Refresh());
             _m_TaskList.RemoveTaskCallBack.AddListener(T => Refresh());
             _m_TaskList.CompleteTaskCallBack.AddListener(T => Refresh());
@@ -246,7 +250,7 @@ namespace AD.Experimental.GameEditor
         {
             SetLeft(message);
             LeftText.source.color = Color.red;
-            MessageInputField.text = MessageInputField.text + "\n" + message;
+            MessageInputField.text = MessageInputField.text + message + "\n";
         }
 
         public void Version(string version)
@@ -304,5 +308,11 @@ namespace AD.Experimental.GameEditor
             Architecture.AddMessage(task.TaskName + " is complete");
         }
 
+        public void OnCommandCall(TaskListRefresh c) => Refresh();
+    }
+
+    public class TaskListRefresh : AD.BASE.Vibration
+    {
+        protected TaskListRefresh() { }
     }
 }

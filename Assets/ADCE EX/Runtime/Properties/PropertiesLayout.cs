@@ -41,7 +41,18 @@ namespace AD.Experimental.GameEditor
 
     public static class PropertiesLayout
     {
-        private static ISerializePropertiesEditor CurrentEditorThat;
+        private static ISerializePropertiesEditor _CurrentEditorThat;
+        public static ISerializePropertiesEditor CurrentEditorThat
+        {
+            get
+            {
+                return _CurrentEditorThat;
+            }
+            private set
+            {
+                _CurrentEditorThat = value;
+            }
+        }
 
         private static List<List<GUIContent>> GUILayoutLineList = new();
         private static bool IsNeedMulLine = true;
